@@ -3,14 +3,15 @@ export class MarsRover {
 
   execute(commands: string) {
     for (const command of commands) {
-      if (this.direction === 'N') {
-        this.direction = 'E';
-      } else if (this.direction === 'E') {
-        this.direction = 'S';
-      } else if (this.direction === 'S') {
-        this.direction = 'W';
-      } else this.direction = 'N'
+      this.direction = this.rotateRight();
     }
     return `0:0:${this.direction}`;
+  }
+
+  private rotateRight(): string {
+    if (this.direction === 'N') return 'E';
+    if (this.direction === 'E') return 'S';
+    if (this.direction === 'S') return 'W';
+    return 'N'
   }
 }
