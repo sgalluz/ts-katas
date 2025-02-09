@@ -21,6 +21,9 @@ export class MarsRover {
   }
 
   private rotateLeft() {
-    return 'W';
+    if (this.direction === 'N') return 'W';
+    if (this.direction === 'W') return 'S';
+    if (this.direction === 'S') return 'E';
+    return 'N'
   }
 }
