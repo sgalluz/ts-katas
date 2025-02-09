@@ -5,5 +5,7 @@ describe('Mars Rover', () => {
 
   beforeEach(() => marsRover = new MarsRover())
 
-  it('works!', () => expect(marsRover).toBeTruthy())
+  it('should rotate right', () => {
+    expect(marsRover.execute('R')).toEqual('0:0:E');
+  })
 })
