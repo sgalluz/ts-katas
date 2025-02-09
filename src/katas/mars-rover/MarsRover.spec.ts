@@ -13,4 +13,10 @@ describe('Mars Rover', () => {
   ])('should rotate right', (commands, output) => {
     expect(marsRover.execute(commands)).toEqual(output);
   })
+
+  it.each([
+    ['L', '0:0:W'],
+  ])('should rotate left', (commands, output) => {
+    expect(marsRover.execute(commands)).toEqual(output);
+  })
 })
