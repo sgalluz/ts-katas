@@ -5,7 +5,12 @@ describe('Mars Rover', () => {
 
   beforeEach(() => marsRover = new MarsRover())
 
-  it('should rotate right', () => {
-    expect(marsRover.execute('R')).toEqual('0:0:E');
+  it.each([
+    ['R', '0:0:E'],
+    ['RR', '0:0:S'],
+    ['RRR', '0:0:W'],
+    ['RRRR', '0:0:N']
+  ])('should rotate right', (commands, output) => {
+    expect(marsRover.execute(commands)).toEqual(output);
   })
 })
