@@ -36,4 +36,11 @@ describe('Mars Rover', () => {
   ])('should wrap around and reappear at the bottom', (commands, position) => {
     expect(marsRover.execute(commands)).toEqual(position);
   })
+
+  it.each([
+    ['RM', '1:0:E'],
+    ['RMMMM', '4:0:E']
+  ])('should move right', (commands, position) => {
+    expect(marsRover.execute(commands)).toEqual(position);
+  })
 })

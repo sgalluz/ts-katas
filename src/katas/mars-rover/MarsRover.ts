@@ -23,10 +23,13 @@ export class MarsRover {
   }
 
   private move(): Coordinate {
-    let y= this.coordinate.y;
+    let y= this.coordinate.y,
+      x = this.coordinate.x;
 
-    if (this.direction.value === CardinalPoint.NORTH) y = (y + 1) % MarsRover.GRID_HEIGHT;
+    const direction = this.direction.value;
+    if (direction === CardinalPoint.NORTH) y = (y + 1) % MarsRover.GRID_HEIGHT;
+    if (direction === CardinalPoint.EAST) x += 1;
 
-    return new Coordinate(this.coordinate.x, y);
+    return new Coordinate(x, y);
   }
 }
