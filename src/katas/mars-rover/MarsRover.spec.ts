@@ -50,4 +50,12 @@ describe('Mars Rover', () => {
   ])('should wrap around and reappear on the left side when moving to east', (commands, position) => {
     expect(marsRover.execute(commands)).toEqual(position);
   })
+
+  it.each([
+    ['LM', '9:0:W'],
+    ['LMMMM', '6:0:W']
+  ])('should move left', (commands, position) => {
+    expect(marsRover.execute(commands)).toEqual(position);
+  })
+
 })

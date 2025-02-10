@@ -30,6 +30,7 @@ export class MarsRover {
     const direction = this.direction.value;
     if (direction === CardinalPoint.NORTH) y = (y + 1) % MarsRover.GRID_HEIGHT;
     if (direction === CardinalPoint.EAST) x = (x + 1) % MarsRover.GRID_WIDTH;
+    if (direction === CardinalPoint.WEST) x = (x > 0 ? x : MarsRover.GRID_WIDTH) - 1;
 
     return new Coordinate(x, y);
   }
