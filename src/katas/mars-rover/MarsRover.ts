@@ -1,29 +1,17 @@
+import { Direction, North } from './Direction';
+
 export class MarsRover {
-  private direction = 'N';
+  private direction: Direction = new North();
 
   execute(commands: string) {
     for (const command of commands) {
       if (command === 'R') {
-        this.direction = this.rotateRight();
+        this.direction = this.direction.right();
       }
       if (command === 'L') {
-        this.direction = this.rotateLeft();
+        this.direction = this.direction.left();
       }
     }
-    return `0:0:${this.direction}`;
-  }
-
-  private rotateRight(): string {
-    if (this.direction === 'N') return 'E';
-    if (this.direction === 'E') return 'S';
-    if (this.direction === 'S') return 'W';
-    return 'N'
-  }
-
-  private rotateLeft() {
-    if (this.direction === 'N') return 'W';
-    if (this.direction === 'W') return 'S';
-    if (this.direction === 'S') return 'E';
-    return 'N'
+    return `0:0:${this.direction.value}`;
   }
 }
