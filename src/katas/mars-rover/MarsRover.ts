@@ -2,6 +2,8 @@ import { CardinalPoint, Direction, North } from './Direction';
 import { Coordinate } from './Coordinate';
 
 export class MarsRover {
+  private static readonly GRID_HEIGHT = 10;
+
   private direction: Direction = new North();
   private coordinate: Coordinate = new Coordinate(0, 0)
 
@@ -23,7 +25,7 @@ export class MarsRover {
   private move(): Coordinate {
     let y= this.coordinate.y;
 
-    if (this.direction.value === CardinalPoint.NORTH) y += 1;
+    if (this.direction.value === CardinalPoint.NORTH) y = (y + 1) % MarsRover.GRID_HEIGHT;
 
     return new Coordinate(this.coordinate.x, y);
   }
