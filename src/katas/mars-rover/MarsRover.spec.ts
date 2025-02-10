@@ -10,8 +10,8 @@ describe('Mars Rover', () => {
     ['RR', '0:0:S'],
     ['RRR', '0:0:W'],
     ['RRRR', '0:0:N']
-  ])('should rotate right', (commands, output) => {
-    expect(marsRover.execute(commands)).toEqual(output);
+  ])('should rotate right', (commands, position) => {
+    expect(marsRover.execute(commands)).toEqual(position);
   })
 
   it.each([
@@ -19,13 +19,13 @@ describe('Mars Rover', () => {
     ['LL', '0:0:S'],
     ['LLL', '0:0:E'],
     ['LLLL', '0:0:N']
-  ])('should rotate left', (commands, output) => {
-    expect(marsRover.execute(commands)).toEqual(output);
+  ])('should rotate left', (commands, position) => {
+    expect(marsRover.execute(commands)).toEqual(position);
   })
 
   it.each([
     ['M', '0:1:N'],
-  ])('should move up', (commands, output) => {
-    expect(marsRover.execute(commands)).toEqual(output);
+  ])('should move up', (commands, position) => {
+    expect(marsRover.execute(commands)).toEqual(position);
   })
 })

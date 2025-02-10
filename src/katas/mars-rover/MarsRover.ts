@@ -1,9 +1,9 @@
-import { Direction, North } from './Direction';
+import { CardinalPoint, Direction, North } from './Direction';
+import { Coordinate } from './Coordinate';
 
 export class MarsRover {
   private direction: Direction = new North();
-  private x = 0;
-  private y = 0;
+  private coordinate: Coordinate = new Coordinate(0, 0)
 
   execute(commands: string) {
     for (const command of commands) {
@@ -14,9 +14,17 @@ export class MarsRover {
         this.direction = this.direction.left();
       }
       if (command === 'M') {
-        this.y += 1
+        this.coordinate = this.move();
       }
     }
-    return `${this.x}:${this.y}:${this.direction.value}`;
+    return `${this.coordinate.x}:${this.coordinate.y}:${this.direction.value}`;
+  }
+
+  private move(): Coordinate {
+    let y= this.coordinate.y;
+
+    if (this.direction.value === CardinalPoint.NORTH) y += 1;
+
+    return new Coordinate(this.coordinate.x, y);
   }
 }
