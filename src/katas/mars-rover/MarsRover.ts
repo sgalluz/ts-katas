@@ -3,6 +3,7 @@ import { Coordinate } from './Coordinate';
 
 export class MarsRover {
   private static readonly GRID_HEIGHT = 10;
+  private static readonly GRID_WIDTH = 10;
 
   private direction: Direction = new North();
   private coordinate: Coordinate = new Coordinate(0, 0)
@@ -28,7 +29,7 @@ export class MarsRover {
 
     const direction = this.direction.value;
     if (direction === CardinalPoint.NORTH) y = (y + 1) % MarsRover.GRID_HEIGHT;
-    if (direction === CardinalPoint.EAST) x += 1;
+    if (direction === CardinalPoint.EAST) x = (x + 1) % MarsRover.GRID_WIDTH;
 
     return new Coordinate(x, y);
   }

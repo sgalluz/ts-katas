@@ -33,7 +33,7 @@ describe('Mars Rover', () => {
   it.each([
     ['MMMMMMMMMM', '0:0:N'],
     ['MMMMMMMMMMMMMMM', '0:5:N']
-  ])('should wrap around and reappear at the bottom', (commands, position) => {
+  ])('should wrap around and reappear at the bottom when moving to north', (commands, position) => {
     expect(marsRover.execute(commands)).toEqual(position);
   })
 
@@ -41,6 +41,13 @@ describe('Mars Rover', () => {
     ['RM', '1:0:E'],
     ['RMMMM', '4:0:E']
   ])('should move right', (commands, position) => {
+    expect(marsRover.execute(commands)).toEqual(position);
+  })
+
+  it.each([
+    ['RMMMMMMMMMM', '0:0:E'],
+    ['RMMMMMMMMMMMMM', '3:0:E']
+  ])('should wrap around and reappear on the left side when moving to east', (commands, position) => {
     expect(marsRover.execute(commands)).toEqual(position);
   })
 })
