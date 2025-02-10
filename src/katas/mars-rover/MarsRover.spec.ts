@@ -58,4 +58,10 @@ describe('Mars Rover', () => {
     expect(marsRover.execute(commands)).toEqual(position);
   })
 
+  it.each([
+    ['LLM', '0:9:S'],
+    ['LLMMMMMM', '0:4:S']
+  ])('should move down', (commands, position) => {
+    expect(marsRover.execute(commands)).toEqual(position);
+  })
 })
