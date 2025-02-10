@@ -9,4 +9,8 @@ export class Coordinate {
   get y(): number {
     return this._y;
   }
+
+  equals(other: Coordinate): boolean {
+    return this.x === other.x && this.y === other.y;
+  }
 }

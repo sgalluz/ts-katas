@@ -1,5 +1,6 @@
 import { MarsRover } from './MarsRover';
 import { Grid } from './Grid';
+import { Coordinate } from './Coordinate';
 
 describe('Mars Rover', () => {
   let marsRover: MarsRover;
@@ -63,6 +64,16 @@ describe('Mars Rover', () => {
     ['LLM', '0:9:S'],
     ['LLMMMMMM', '0:4:S']
   ])('should move down', (commands, position) => {
+    expect(marsRover.execute(commands)).toEqual(position);
+  })
+
+  it.each([
+    ['MMM', 'O:0:2:N'],
+    ['RMMMRMMMM', 'O:3:8:S']
+  ])('should stay still when encountering an obstacle', (commands, position) => {
+    const obstacles = [new Coordinate(0, 3), new Coordinate(3, 7)];
+    const grid = new Grid(obstacles);
+    marsRover = new MarsRover(grid)
     expect(marsRover.execute(commands)).toEqual(position);
   })
 })
