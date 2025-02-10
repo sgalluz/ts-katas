@@ -6,7 +6,7 @@ export enum CardinalPoint {
 }
 
 export interface Direction {
-    readonly value: string;
+    readonly value: CardinalPoint;
     right(): Direction;
     left(): Direction;
 }
@@ -18,19 +18,19 @@ export class North implements Direction {
 }
 
 export class East implements Direction {
-  readonly value: string = CardinalPoint.EAST;
+  readonly value = CardinalPoint.EAST;
   right = (): Direction => new South();
   left = (): Direction => new North();
 }
 
 export class South implements Direction {
-  readonly value: string = CardinalPoint.SOUTH;
+  readonly value = CardinalPoint.SOUTH;
   right = (): Direction => new West();
   left = (): Direction => new East();
 }
 
 export class West implements Direction {
-  readonly value: string = CardinalPoint.WEST;
+  readonly value = CardinalPoint.WEST;
   left = (): Direction => new South();
   right = (): Direction => new North();
 }

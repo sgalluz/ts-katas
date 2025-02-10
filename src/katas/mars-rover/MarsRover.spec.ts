@@ -1,9 +1,10 @@
 import { MarsRover } from './MarsRover';
+import { Grid } from './Grid';
 
 describe('Mars Rover', () => {
   let marsRover: MarsRover;
 
-  beforeEach(() => marsRover = new MarsRover())
+  beforeEach(() => marsRover = new MarsRover(new Grid()))
 
   it.each([
     ['R', '0:0:E'],
