@@ -19,15 +19,17 @@ export class MarsRover {
         this.direction = this.direction.left();
       }
       if (command === 'M') {
-        const coordinate = this.grid.moveToNextCoordinateFrom(this.coordinate, this.direction.value);
-        if (!coordinate) {
-          hasObstacle = true;
-        } else {
-          hasObstacle = false;
-          this.coordinate = coordinate;
-        }
+        hasObstacle = this.move();
       }
     }
-    return (hasObstacle ? 'O:' : '') + `${this.coordinate.x}:${this.coordinate.y}:${this.direction.value}`;
+
+    const obstaclePrefix = hasObstacle ? 'O:' : '';
+    return `${obstaclePrefix}${this.coordinate.x}:${this.coordinate.y}:${this.direction.value}`;
+  }
+
+  private move() {
+    const coordinate = this.grid.moveToNextCoordinateFrom(this.coordinate, this.direction.value);
+    this.coordinate = coordinate ?? this.coordinate;
+    return !coordinate || false;
   }
 }
