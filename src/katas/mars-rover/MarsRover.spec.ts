@@ -67,13 +67,26 @@ describe('Mars Rover', () => {
     expect(marsRover.execute(commands)).toEqual(position);
   })
 
-  it.each([
-    ['MMM', 'O:0:2:N'],
-    ['RMMMRMMMM', 'O:3:8:S']
-  ])('should stay still when encountering an obstacle', (commands, position) => {
-    const obstacles = [new Coordinate(0, 3), new Coordinate(3, 7)];
-    const grid = new Grid(obstacles);
-    marsRover = new MarsRover(grid)
-    expect(marsRover.execute(commands)).toEqual(position);
+  describe('when encountering an obstacle', () => {
+    beforeEach(() => {
+      const obstacles = [new Coordinate(0, 3), new Coordinate(3, 7)];
+      const grid = new Grid(obstacles);
+      marsRover = new MarsRover(grid)
+    })
+
+    it.each([
+      ['MMM', 'O:0:2:N'],
+      ['RMMMRMMMM', 'O:3:8:S'],
+    ])('should stay still', (commands, position) => {
+      expect(marsRover.execute(commands)).toEqual(position);
+    })
+
+
+    it.each([
+      ['MMMLMMRMMMLM', '7:5:W'],
+      ['RMMMRMMMMLMMRMM', '5:6:S'],
+    ])('should travel an entire path after having skipped the obstacles', (commands, position) => {
+      expect(marsRover.execute(commands)).toEqual(position);
+    })
   })
 })
