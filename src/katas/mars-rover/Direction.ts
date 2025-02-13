@@ -1,14 +1,14 @@
 export enum CardinalPoint {
-    NORTH = 'N',
-    EAST = 'E',
-    SOUTH = 'S',
-    WEST = 'W'
+  NORTH = 'N',
+  EAST = 'E',
+  SOUTH = 'S',
+  WEST = 'W'
 }
 
 export interface Direction {
-    readonly value: CardinalPoint;
-    right(): Direction;
-    left(): Direction;
+  readonly value: CardinalPoint;
+  right(): Direction;
+  left(): Direction;
 }
 
 export class North implements Direction {
@@ -33,4 +33,13 @@ export class West implements Direction {
   readonly value = CardinalPoint.WEST;
   left = (): Direction => new South();
   right = (): Direction => new North();
+}
+
+export function directionFrom(cardinalPoint: CardinalPoint): Direction {
+  switch (cardinalPoint) {
+  case CardinalPoint.NORTH: return new North();
+  case CardinalPoint.SOUTH: return new South();
+  case CardinalPoint.EAST: return new East();
+  case CardinalPoint.WEST: return new West();
+  }
 }
