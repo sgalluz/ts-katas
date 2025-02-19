@@ -1,4 +1,4 @@
-import {Command, Orientation, State} from "./MarsRover";
+import {Command, Orientation, State} from './MarsRover';
 
 export  function rotate(state: State, direction: Command): State {
     const orientations : Orientation[] = ['N', 'E', 'S', 'W']
