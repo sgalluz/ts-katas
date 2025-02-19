@@ -9,6 +9,7 @@ enum RoverDirection {
 enum Command {
   RIGHT = "R",
   LEFT = "L",
+  MOVE = "M",
 }
 
 export class MarsRover {
@@ -16,6 +17,7 @@ export class MarsRover {
   static readonly counterClockWiseDirections = "NWSE";
 
   private direction: RoverDirection = RoverDirection.N;
+  private coordinate = { x: 0, y: 0 };
 
   execute(commands: string): string {
     // let roverDirection = directions[commands.length % directions.length];
@@ -31,7 +33,7 @@ export class MarsRover {
       }
     }
 
-    return `0:0:${this.direction}`;
+    return `${this.coordinate.x}:${this.coordinate.y}:${this.direction}`;
   }
 
   private rotateRight() {

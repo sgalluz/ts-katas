@@ -23,6 +23,19 @@ describe("Mars Rover", () => {
     ])("turn left", (command, expectation) => {
       expect(marsRover.execute(command)).toEqual(expectation);
     });
+
+    it.each([
+      ["M", "0:1:N"],
+      ["MM", "0:2:N"],
+      ["RM", "1:0:E"],
+      ["RMM", "2:0:E"],
+      ["LM", "9:0:W"],
+      ["LMM", "8:0:W"],
+      ["LLM", "0:9:S"],
+      ["RRM", "0:9:S"],
+    ])("moves", (command, expectation) => {
+      expect(marsRover.execute(command)).toEqual(expectation);
+    });
   });
 });
 
