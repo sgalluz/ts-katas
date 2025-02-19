@@ -10,4 +10,5 @@ describe('Mars Rover', () => {
   it('Move 1 times', () => expect(navigate('M')).toBe('0:1:N'))
   it('Move 1 times south', () => expect(navigate('RRM')).toBe('0:9:S'))
   it('Move 10 times', () => expect(navigate('MMMMMMMMMM')).toBe('0:0:N'))
+  it('Move and rotate ', () => expect(navigate('MMRMMLM')).toBe('2:3:N'))
 })
