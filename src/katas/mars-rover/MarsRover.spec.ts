@@ -14,6 +14,15 @@ describe("Mars Rover", () => {
     ])("turn right", (command, expectation) => {
       expect(marsRover.execute(command)).toEqual(expectation);
     });
+
+    it.each([
+      ["L", "0:0:W"],
+      ["LL", "0:0:S"],
+      ["LLL", "0:0:E"],
+      ["LLLL", "0:0:N"],
+    ])("turn left", (command, expectation) => {
+      expect(marsRover.execute(command)).toEqual(expectation);
+    });
   });
 });
 
