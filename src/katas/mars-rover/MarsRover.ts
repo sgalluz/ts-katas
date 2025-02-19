@@ -75,71 +75,56 @@ class MarsRover {
   };
 
   moveForward = (): void => {
+    let temp_x: number;
+    let temp_y: number;
     switch (this.direction) {
       case Direction.N:
         if (this.y < this.grid.y - 1) {
-          const temp_y = this.y + 1;
-          if (
-            this.grid.obstacles.find((o) => o.x === this.x && o.y === temp_y)
-          ) {
-            this.obstacleFound = true;
-            break;
-          }
-          this.y = temp_y;
+          temp_y = this.y + 1;
         } else {
-          this.y = 0;
+          temp_y = 0;
         }
+        if (this.grid.hasObstacle(this.x, temp_y)) {
+          this.obstacleFound = true;
+          break;
+        }
+        this.y = temp_y;
         break;
       case Direction.E:
         if (this.x < this.grid.x - 1) {
-          const temp_x = this.x + 1;
-          if (this.grid.hasObstacle(temp_x, this.y)) {
-            this.obstacleFound = true;
-            break;
-          }
-          this.x = temp_x;
+          temp_x = this.x + 1;
         } else {
-          const temp_x = 0;
-          if (this.grid.hasObstacle(temp_x, this.y)) {
-            this.obstacleFound = true;
-            break;
-          }
-          this.x = temp_x;
+          temp_x = 0;
         }
+        if (this.grid.hasObstacle(temp_x, this.y)) {
+          this.obstacleFound = true;
+          break;
+        }
+        this.x = temp_x;
         break;
       case Direction.S:
         if (this.y > 0) {
-          const temp_y = this.y - 1;
-          if (this.grid.hasObstacle(this.x, temp_y)) {
-            this.obstacleFound = true;
-            break;
-          }
-          this.y = temp_y;
+          temp_y = this.y - 1;
         } else {
-          const temp_y = this.grid.y;
-          if (this.grid.hasObstacle(this.x, temp_y)) {
-            this.obstacleFound = true;
-            break;
-          }
-          this.y = temp_y;
+          temp_y = this.grid.y;
         }
+        if (this.grid.hasObstacle(this.x, temp_y)) {
+          this.obstacleFound = true;
+          break;
+        }
+        this.y = temp_y;
         break;
       case Direction.W:
         if (this.x > 0) {
-          const temp_x = this.x - 1;
-          if (this.grid.hasObstacle(temp_x, this.y)) {
-            this.obstacleFound = true;
-            break;
-          }
-          this.x = temp_x;
+          temp_x = this.x - 1;
         } else {
-          const temp_x = this.grid.x;
-          if (this.grid.hasObstacle(temp_x, this.y)) {
-            this.obstacleFound = true;
-            break;
-          }
-          this.x = temp_x;
+          temp_x = this.grid.x;
         }
+        if (this.grid.hasObstacle(temp_x, this.y)) {
+          this.obstacleFound = true;
+          break;
+        }
+        this.x = temp_x;
         break;
     }
   };
