@@ -33,6 +33,8 @@ describe("Mars Rover", () => {
       ["LMM", "8:0:W"],
       ["LLM", "0:9:S"],
       ["RRM", "0:9:S"],
+      ["MMMMMMMMMM", "0:0:N"],
+      ["RRMMMMMMMMMM", "0:0:S"],
     ])("moves to %s becomes %s", (command, expectation) => {
       expect(marsRover.execute(command)).toEqual(expectation);
     });
