@@ -6,14 +6,13 @@ describe("Mars Rover", () => {
   beforeEach(() => (marsRover = new MarsRover()));
 
   describe("Commands", () => {
-    it("turn right", () => {
-      expect(marsRover.execute("R")).toEqual("0:0:E");
-
-      expect(marsRover.execute("RR")).toEqual("0:0:S");
-
-      expect(marsRover.execute("RRR")).toEqual("0:0:W");
-
-      expect(marsRover.execute("RRRR")).toEqual("0:0:N");
+    it.each([
+      ["R", "0:0:E"],
+      ["RR", "0:0:S"],
+      ["RRR", "0:0:W"],
+      ["RRRR", "0:0:N"],
+    ])("turn right", (command, expectation) => {
+      expect(marsRover.execute(command)).toEqual(expectation);
     });
   });
 });
