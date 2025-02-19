@@ -12,6 +12,13 @@ enum Command {
   MOVE = "M",
 }
 
+const MOVEMENTS = {
+  N: [0, 1],
+  S: [0, -1],
+  W: [-1, 0],
+  E: [1, 0],
+};
+
 export class MarsRover {
   static readonly clockWiseDirections = "NESW";
   static readonly counterClockWiseDirections = "NWSE";
@@ -29,6 +36,8 @@ export class MarsRover {
         case Command.LEFT:
           this.direction = this.rotateLeft();
           break;
+        case Command.MOVE:
+          this.coordinate = this.move();
         default:
       }
     }
@@ -48,5 +57,26 @@ export class MarsRover {
       (MarsRover.counterClockWiseDirections.indexOf(this.direction) + 1) %
         MarsRover.counterClockWiseDirections.length
     ] as RoverDirection;
+  }
+
+  private move() {
+    let x = this.coordinate.x;
+    let y = this.coordinate.y;
+
+    const movement = MOVEMENTS[this.direction];
+
+    if (x + movement[0] < 0) {
+      x = 9;
+    } else {
+      x = x + movement[0];
+    }
+
+    if (y + movement[1] < 0) {
+      y = 9;
+    } else {
+      y = y + movement[1];
+    }
+
+    return { x, y };
   }
 }

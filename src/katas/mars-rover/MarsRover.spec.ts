@@ -11,7 +11,7 @@ describe("Mars Rover", () => {
       ["RR", "0:0:S"],
       ["RRR", "0:0:W"],
       ["RRRR", "0:0:N"],
-    ])("turn right", (command, expectation) => {
+    ])("turn right %s", (command, expectation) => {
       expect(marsRover.execute(command)).toEqual(expectation);
     });
 
@@ -20,7 +20,7 @@ describe("Mars Rover", () => {
       ["LL", "0:0:S"],
       ["LLL", "0:0:E"],
       ["LLLL", "0:0:N"],
-    ])("turn left", (command, expectation) => {
+    ])("turn left %s", (command, expectation) => {
       expect(marsRover.execute(command)).toEqual(expectation);
     });
 
@@ -33,7 +33,7 @@ describe("Mars Rover", () => {
       ["LMM", "8:0:W"],
       ["LLM", "0:9:S"],
       ["RRM", "0:9:S"],
-    ])("moves", (command, expectation) => {
+    ])("moves to %s becomes %s", (command, expectation) => {
       expect(marsRover.execute(command)).toEqual(expectation);
     });
   });
