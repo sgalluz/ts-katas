@@ -76,8 +76,7 @@ export class CartManager {
      * Huge method that calculates everything (Responsibilities 3, 4, 5, 7, 8)
      */
   public getFinalSummary(): { total: number, discount: number, shippingCost: number, finalTotal: number } {
-    const subtotal = this.items.reduce((acc, item) => acc + item.product.price * item.quantity, 0)
-    const totalWeight = this.items.reduce((acc, item) => acc + item.product.weightKg * item.quantity, 0)
+    const subtotal = this.getSubtotal()
 
     const discount = this.discountCalculator.calculateDiscount(subtotal, this.userProfile, this.appliedCouponCode)
 
@@ -85,7 +84,7 @@ export class CartManager {
 
     const shippingCost = this.shippingCalculator.calculateShipping(
       totalAfterDiscount,
-      totalWeight,
+      this.getTotalWeight(),
       this.shippingAddress,
       this.userProfile,
       this.appliedCouponCode
@@ -103,5 +102,19 @@ export class CartManager {
       shippingCost: shippingCost,
       finalTotal: finalTotal
     }
+  }
+
+  private getTotalWeight(): number {
+    return this.items.reduce(
+      (acc, { product, quantity }) => acc + product.weightKg * quantity,
+      0
+    )
+  }
+
+  private getSubtotal(): number {
+    return this.items.reduce(
+      (acc, { product, quantity }) => acc + product.price * quantity,
+      0
+    )
   }
 }
