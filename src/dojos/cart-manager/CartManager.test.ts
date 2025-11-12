@@ -124,4 +124,29 @@ describe('CartManager', () => {
       expect(actual.message).toEqual('Item removed or zero quantity ignored.')
     })
   })
+
+  describe('when asking for the final summary', () => {
+    // Here we see the real value of characterization tests while refactoring a legacy class.
+    // The test is highlighting that getFinalSummary method is not working as expected,
+    // as it is applying shipping cost also when users have no items in the cart.
+    // A refactor without this test would likely have missed this edge case and introduced a regression.
+    it('should return zero totals for an empty cart', () => {
+      const user: UserProfile = {
+        id: 4,
+        type: UserType.Standard,
+        isFirstPurchase: false,
+        savedCartItems: []
+      }
+      const cartManager = new CartManager(user)
+
+      const actual = cartManager.getFinalSummary()
+
+      expect(actual).toEqual({
+        total: 0,
+        discount: 0,
+        shippingCost: 15, // here's the strange behavior as it charges shipping on empty cart
+        finalTotal: 15
+      })
+    })
+  })
 })
