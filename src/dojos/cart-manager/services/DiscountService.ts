@@ -8,7 +8,6 @@ export class DiscountServiceV2 implements IDiscountService {
   public validateCoupon(code: string, total: number, userType: UserType): number | null {
     return DiscountService.validateCoupon(code, total, userType)
   }
-
 }
 
 /**
