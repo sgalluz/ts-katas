@@ -9,10 +9,6 @@ import { Notifier } from './services/Notifier'
 import { CartItemsLoader } from './services/CartItemsLoader'
 import { ProductRepository } from './services/ProductRepository'
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-const noop = () => {
-}
-
 class UserProfileBuilder {
   private profile: UserProfile = { id: 1, type: UserType.Standard, isFirstPurchase: false, savedCartItems: [] }
 
@@ -82,16 +78,6 @@ describe('CartManager', () => {
   afterEach(() => jest.clearAllMocks())
 
   describe('when invoking the constructor', () => {
-    let logSpy: jest.SpyInstance
-
-    beforeEach(() => {
-      /* eslint-disable @typescript-eslint/no-explicit-any */
-      logSpy = jest.spyOn(CartManager.prototype as any, 'logCartInitialization').mockImplementation(noop)
-      /* eslint-enable @typescript-eslint/no-explicit-any */
-    })
-
-    afterEach(() => jest.restoreAllMocks())
-
     it('should log the cart initialization and load the cart items via repository', () => {
       const userId = 123
       const user = aUser()
@@ -102,7 +88,7 @@ describe('CartManager', () => {
 
       buildCartManager(user)
 
-      expect(logSpy).toHaveBeenCalledWith(userId)
+      expect(mockLogger.log).toHaveBeenCalledWith(`[LOGGING] Cart initialized for user: ${userId}.`)
       expect(mockProductRepository.getProductById).toHaveBeenCalledWith(1)
     })
 
@@ -115,6 +101,7 @@ describe('CartManager', () => {
 
       buildCartManager(profile)
 
+      expect(mockLogger.log).toHaveBeenCalledWith('[LOGGING] Cart initialized for user: 456.')
       expect(mockProductRepository.getProductById).not.toHaveBeenCalled()
     })
 
@@ -129,6 +116,7 @@ describe('CartManager', () => {
       buildCartManager(profile)
 
       expect(mockLogger.log).toHaveBeenCalledWith('Loading 2 saved items for user 100')
+      expect(mockLogger.log).toHaveBeenCalledWith('[LOGGING] Cart initialized for user: 100.')
       expect(mockProductRepository.getProductById).toHaveBeenCalledTimes(2)
       expect(mockProductRepository.getProductById).toHaveBeenCalledWith(1)
       expect(mockProductRepository.getProductById).toHaveBeenCalledWith(2)

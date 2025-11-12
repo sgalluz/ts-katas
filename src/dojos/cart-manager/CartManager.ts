@@ -25,22 +25,11 @@ export class CartManager {
         private readonly notifier: INotifier,
         private readonly logger: ILogger
   ) {
-    // Responsibility 6: Initial State Loading
     if (this.userProfile.savedCartItems.length > 0) {
       this.logger.log(`Loading ${this.userProfile.savedCartItems.length} saved items for user ${this.userProfile.id}`)
       this.items = this.cartItemsLoader.loadItems(this.userProfile.savedCartItems)
     }
-
-    // Side effect/Implicit initialization that makes instantiation difficult
-    this.logCartInitialization(this.userProfile.id)
-  }
-
-  /**
-     * Side effect in the constructor.
-     */
-  private logCartInitialization(userId: number): void {
-    // Simulates writing to an external log file
-    this.logger.log(`[LOGGING] Cart initialized for user: ${userId}.`)
+    this.logger.log(`[LOGGING] Cart initialized for user: ${this.userProfile.id}.`)
   }
 
   /**
