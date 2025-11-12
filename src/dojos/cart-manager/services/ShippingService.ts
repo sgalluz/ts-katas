@@ -1,3 +1,13 @@
+export interface IShippingService {
+    calculate(address: string, totalWeight: number): number;
+}
+
+export class ShippingServiceV2 implements IShippingService {
+  public calculate(address: string, totalWeight: number): number {
+    return ShippingService.calculate(address, totalWeight)
+  }
+}
+
 /**
  * Simulates a SLOW external service for shipping.
  * Static method = tight coupling.

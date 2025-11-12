@@ -1,6 +1,15 @@
-// --- External Services (Hard to mock) ---
-
 import { UserType } from '../models/UserProfile'
+
+export interface IDiscountService {
+    validateCoupon(code: string, total: number, userType: UserType): number | null;
+}
+
+export class DiscountServiceV2 implements IDiscountService {
+  public validateCoupon(code: string, total: number, userType: UserType): number | null {
+    return DiscountService.validateCoupon(code, total, userType)
+  }
+
+}
 
 /**
  * Simulates an external service for discount validation.
