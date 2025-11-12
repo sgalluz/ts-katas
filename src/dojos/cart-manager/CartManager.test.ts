@@ -7,6 +7,51 @@ import { ShippingService } from './services/ShippingService'
 const noop = () => {
 }
 
+class UserProfileBuilder {
+  private profile: UserProfile = { id: 1, type: UserType.Standard, isFirstPurchase: false, savedCartItems: [] }
+
+  withId(id: number): this {
+    this.profile.id = id
+    return this
+  }
+
+  asGuest(): this {
+    this.profile.type = UserType.Guest
+    return this
+  }
+
+  asStandard(): this {
+    this.profile.type = UserType.Standard
+    return this
+  }
+
+  asPremium(): this {
+    this.profile.type = UserType.Premium
+    return this
+  }
+
+  asFirstPurchase(): this {
+    this.profile.isFirstPurchase = true
+    return this
+  }
+
+  withSavedItem(productId: number, quantity: number): this {
+    this.profile.savedCartItems.push({ productId, quantity })
+    return this
+  }
+
+  withSavedItems(items: { productId: number, quantity: number }[]): this {
+    this.profile.savedCartItems = items
+    return this
+  }
+
+  build(): UserProfile {
+    return { ...this.profile }
+  }
+}
+
+const aUser = () => new UserProfileBuilder()
+
 describe('CartManager', () => {
   describe('when invoking the constructor', () => {
     let logSpy: jest.SpyInstance,
@@ -23,10 +68,11 @@ describe('CartManager', () => {
 
     it('should log the cart initialization and load the cart', () => {
       const userId = 123
-      const user: UserProfile = {
-        id: userId, type: UserType.Standard, isFirstPurchase: false,
-        savedCartItems: [{ productId: 1, quantity: 1 }]
-      }
+      const user = aUser()
+        .withId(userId)
+        .asStandard()
+        .withSavedItem(1, 1)
+        .build()
 
       new CartManager(user)
 
@@ -35,12 +81,11 @@ describe('CartManager', () => {
     })
 
     it('should not load the cart in case of no items previously saved in cart', () => {
-      const profile: UserProfile = {
-        id: 456,
-        type: UserType.Premium,
-        isFirstPurchase: true,
-        savedCartItems: []
-      }
+      const profile = aUser()
+        .withId(456)
+        .asPremium()
+        .asFirstPurchase()
+        .build()
 
       new CartManager(profile)
 
@@ -49,15 +94,12 @@ describe('CartManager', () => {
 
     it('should log number of saved items being loaded', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
-      const profile: UserProfile = {
-        id: 100,
-        type: UserType.Standard,
-        isFirstPurchase: false,
-        savedCartItems: [
-          { productId: 1, quantity: 1 },
-          { productId: 2, quantity: 2 }
-        ]
-      }
+      const profile = aUser()
+        .withId(100)
+        .asStandard()
+        .withSavedItem(1, 1)
+        .withSavedItem(2, 2)
+        .build()
 
       new CartManager(profile)
 
@@ -67,12 +109,7 @@ describe('CartManager', () => {
 
   describe('when updating the cart', () => {
     it('should add two pieces of the same product to the cart', () => {
-      const user: UserProfile = {
-        id: 1,
-        type: UserType.Standard,
-        isFirstPurchase: false,
-        savedCartItems: []
-      }
+      const user = aUser().build()
       const cartManager = new CartManager(user)
 
       const actual = cartManager.updateCart(1, 2)
@@ -82,12 +119,10 @@ describe('CartManager', () => {
     })
 
     it('should prevent VIP user from adding expensive product', () => {
-      const user: UserProfile = {
-        id: 999,
-        type: UserType.Premium,
-        isFirstPurchase: false,
-        savedCartItems: []
-      }
+      const user = aUser()
+        .withId(999)
+        .asPremium()
+        .build()
       const cartManager = new CartManager(user)
 
       const actual = cartManager.updateCart(11, 1)
@@ -97,12 +132,10 @@ describe('CartManager', () => {
     })
 
     it('should update the quantity of the existing item', () => {
-      const user: UserProfile = {
-        id: 3,
-        type: UserType.Standard,
-        isFirstPurchase: false,
-        savedCartItems: [{ productId: 1, quantity: 2 }]
-      }
+      const user = aUser()
+        .withId(3)
+        .withSavedItem(1, 2)
+        .build()
       const cartManager = new CartManager(user)
 
       const actual = cartManager.updateCart(1, 5)
@@ -112,12 +145,10 @@ describe('CartManager', () => {
     })
 
     it('should remove an item from the cart when its quantity is equal or less than zero', () => {
-      const user: UserProfile = {
-        id: 2,
-        type: UserType.Standard,
-        isFirstPurchase: false,
-        savedCartItems: [{ productId: 1, quantity: 2 }]
-      }
+      const user = aUser()
+        .withId(2)
+        .withSavedItem(1, 2)
+        .build()
       const cartManager = new CartManager(user)
 
       const actual = cartManager.updateCart(1, 0)
@@ -133,12 +164,7 @@ describe('CartManager', () => {
     // as it is applying shipping cost also when users have no items in the cart.
     // A refactor without this test would likely have missed this edge case and introduced a regression.
     it('should return zero totals for an empty cart', () => {
-      const user: UserProfile = {
-        id: 4,
-        type: UserType.Standard,
-        isFirstPurchase: false,
-        savedCartItems: []
-      }
+      const user = aUser().withId(4).build()
       const cartManager = new CartManager(user)
 
       const actual = cartManager.getFinalSummary()
@@ -152,12 +178,10 @@ describe('CartManager', () => {
     })
 
     it('should apply first purchase discount for standard users', () => {
-      const user: UserProfile = {
-        id: 5,
-        type: UserType.Standard,
-        isFirstPurchase: true,
-        savedCartItems: []
-      }
+      const user = aUser()
+        .withId(5)
+        .asFirstPurchase()
+        .build()
       const cartManager = new CartManager(user)
       cartManager.updateCart(2, 1)
 
@@ -175,12 +199,12 @@ describe('CartManager', () => {
       { type: UserType.Premium, label: UserType.Premium.toLowerCase() },
       { type: UserType.Guest, label: UserType.Guest.toLowerCase() },
     ])('should not apply first purchase discount for $label users', ({ type }) => {
-      const user: UserProfile = {
-        id: 7,
-        type,
-        isFirstPurchase: true,
-        savedCartItems: []
-      }
+      const user = aUser()
+        .withId(7)
+        .asFirstPurchase()
+        .build()
+      user.type = type // Override type dopo build
+
       const cartManager = new CartManager(user)
       cartManager.updateCart(2, 1)
 
@@ -207,12 +231,10 @@ describe('CartManager', () => {
       it('should invoke discount service with correct user type and calculate total accordingly', () => {
         discountSpy.mockReturnValue(4)
 
-        const user: UserProfile = {
-          id: 10,
-          type: UserType.Premium,
-          isFirstPurchase: false,
-          savedCartItems: []
-        }
+        const user = aUser()
+          .withId(10)
+          .asPremium()
+          .build()
         const cartManager = new CartManager(user)
         cartManager.updateCart(4, 1, 'TS_DOJO_20')
 
@@ -230,12 +252,9 @@ describe('CartManager', () => {
       it('should calulate wieght-based shipping cost correctly', () => {
         shippingSpy.mockReturnValue(25)
 
-        const user: UserProfile = {
-          id: 11,
-          type: UserType.Standard,
-          isFirstPurchase: false,
-          savedCartItems: []
-        }
+        const user = aUser()
+          .withId(11)
+          .build()
         const cartManager = new CartManager(user)
         cartManager.updateCart(4, 1, undefined, '123 Main St, Island City')
 
@@ -253,12 +272,10 @@ describe('CartManager', () => {
 
     describe('and order total exceeds free validation thresholds', () => {
       it('should apply extra fees for orders above $200', () => {
-        const user: UserProfile = {
-          id: 11,
-          type: UserType.Guest,
-          isFirstPurchase: false,
-          savedCartItems: []
-        }
+        const user = aUser()
+          .withId(11)
+          .asGuest()
+          .build()
         const cartManager = new CartManager(user)
         cartManager.updateCart(5, 5)
 
@@ -273,21 +290,19 @@ describe('CartManager', () => {
       })
 
       it('should send high value order alert for big orders', () => {
-        const user: UserProfile = {
-          id: 12,
-          type: UserType.Standard,
-          isFirstPurchase: false,
-          savedCartItems: [
+        const consoleSpy = jest.spyOn(console, 'log')
+        const user = aUser()
+          .withId(12)
+          .withSavedItems([
             { productId: 1, quantity: 10 },
             { productId: 2, quantity: 5 },
             { productId: 3, quantity: 4 },
             { productId: 4, quantity: 3 },
             { productId: 5, quantity: 1 },
-          ]
-        }
+          ])
+          .build()
         const cartManager = new CartManager(user)
         cartManager.updateCart(6, 1)
-        const consoleSpy = jest.spyOn(console, 'log')
 
         const actual = cartManager.getFinalSummary()
 
