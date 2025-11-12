@@ -6,6 +6,8 @@ import { Logger } from './services/Logger'
 import { DiscountCalculator } from './services/DiscountCalculator'
 import { ShippingCalculator } from './services/ShippingCalculator'
 import { Notifier } from './services/Notifier'
+import { CartItemsLoader } from './services/CartItemsLoader'
+import { ProductRepository } from './services/ProductRepository'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = () => {
@@ -59,29 +61,38 @@ const aUser = () => new UserProfileBuilder()
 const mockDiscountService: jest.Mocked<IDiscountService> = { validateCoupon: jest.fn() }
 const mockShippingService: jest.Mocked<IShippingService> = { calculate: jest.fn() }
 const mockLogger: jest.Mocked<Logger> = { log: jest.fn(), warn: jest.fn() }
+const mockProductRepository: jest.Mocked<ProductRepository> = { getProductById: jest.fn() }
 
 const buildCartManager = (user: UserProfile) => {
+  const cartItemLoader = new CartItemsLoader(mockProductRepository)
   const discountCalculator = new DiscountCalculator(mockDiscountService)
   const shippingCalculator = new ShippingCalculator(mockShippingService)
   const notifier = new Notifier(mockLogger)
-  return new CartManager(user, discountCalculator, shippingCalculator, notifier, mockLogger)
+  return new CartManager(user, cartItemLoader, discountCalculator, shippingCalculator, notifier, mockLogger)
 }
 
 describe('CartManager', () => {
+  beforeEach(() => mockProductRepository.getProductById.mockImplementation((productId: number) => ({
+    id: productId,
+    name: `Product ${productId}`,
+    price: productId * 10,
+    weightKg: 1
+  })))
+
+  afterEach(() => jest.clearAllMocks())
+
   describe('when invoking the constructor', () => {
-    let logSpy: jest.SpyInstance,
-      loadCartSpy: jest.SpyInstance
+    let logSpy: jest.SpyInstance
 
     beforeEach(() => {
       /* eslint-disable @typescript-eslint/no-explicit-any */
       logSpy = jest.spyOn(CartManager.prototype as any, 'logCartInitialization').mockImplementation(noop)
-      loadCartSpy = jest.spyOn(CartManager.prototype as any, 'loadInitialCart').mockImplementation(noop)
       /* eslint-enable @typescript-eslint/no-explicit-any */
     })
 
     afterEach(() => jest.restoreAllMocks())
 
-    it('should log the cart initialization and load the cart', () => {
+    it('should log the cart initialization and load the cart items via repository', () => {
       const userId = 123
       const user = aUser()
         .withId(userId)
@@ -92,7 +103,7 @@ describe('CartManager', () => {
       buildCartManager(user)
 
       expect(logSpy).toHaveBeenCalledWith(userId)
-      expect(loadCartSpy).toHaveBeenCalledWith(user.savedCartItems)
+      expect(mockProductRepository.getProductById).toHaveBeenCalledWith(1)
     })
 
     it('should not load the cart in case of no items previously saved in cart', () => {
@@ -104,10 +115,10 @@ describe('CartManager', () => {
 
       buildCartManager(profile)
 
-      expect(loadCartSpy).not.toHaveBeenCalled()
+      expect(mockProductRepository.getProductById).not.toHaveBeenCalled()
     })
 
-    it('should log number of saved items being loaded', () => {
+    it('should log number of saved items being loaded and retrieve each product', () => {
       const profile = aUser()
         .withId(100)
         .asStandard()
@@ -118,6 +129,9 @@ describe('CartManager', () => {
       buildCartManager(profile)
 
       expect(mockLogger.log).toHaveBeenCalledWith('Loading 2 saved items for user 100')
+      expect(mockProductRepository.getProductById).toHaveBeenCalledTimes(2)
+      expect(mockProductRepository.getProductById).toHaveBeenCalledWith(1)
+      expect(mockProductRepository.getProductById).toHaveBeenCalledWith(2)
     })
   })
 

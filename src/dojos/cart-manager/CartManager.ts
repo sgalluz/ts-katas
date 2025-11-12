@@ -4,6 +4,7 @@ import { ILogger } from './services/Logger'
 import { DiscountCalculator } from './services/DiscountCalculator'
 import { ShippingCalculator } from './services/ShippingCalculator'
 import { INotifier } from './services/Notifier'
+import { ICartItemsLoader } from './services/CartItemsLoader'
 
 
 // The God Class
@@ -18,6 +19,7 @@ export class CartManager {
      */
   constructor(
         private readonly userProfile: UserProfile, // Still depends on an entire profile, just implementing DI via constructor
+        private readonly cartItemsLoader: ICartItemsLoader,
         private readonly discountCalculator: DiscountCalculator,
         private readonly shippingCalculator: ShippingCalculator,
         private readonly notifier: INotifier,
@@ -26,29 +28,11 @@ export class CartManager {
     // Responsibility 6: Initial State Loading
     if (this.userProfile.savedCartItems.length > 0) {
       this.logger.log(`Loading ${this.userProfile.savedCartItems.length} saved items for user ${this.userProfile.id}`)
-      // Simulation of complex merge logic with current in-memory products
-      this.loadInitialCart(this.userProfile.savedCartItems)
+      this.items = this.cartItemsLoader.loadItems(this.userProfile.savedCartItems)
     }
 
     // Side effect/Implicit initialization that makes instantiation difficult
     this.logCartInitialization(this.userProfile.id)
-  }
-
-  /**
-     * Private helper method that complicates constructor testing.
-     * Simulates data retrieval and validation.
-     */
-  private loadInitialCart(savedItems: { productId: number, quantity: number }[]) {
-    savedItems.forEach(item => {
-      // Simulates product retrieval from DB (another hidden dependency!)
-      const product: Product = {
-        id: item.productId,
-        name: `Product ${item.productId}`,
-        price: item.productId * 10,
-        weightKg: 1
-      }
-      this.items.push({ product, quantity: item.quantity })
-    })
   }
 
   /**
