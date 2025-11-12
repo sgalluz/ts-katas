@@ -62,4 +62,21 @@ describe('CartManager', () => {
       expect(consoleSpy).toHaveBeenCalledWith('Loading 2 saved items for user 100')
     })
   })
+
+  describe('when updating the cart', () => {
+    it('should add two pieces of the same product to the cart', () => {
+      const user: UserProfile = {
+        id: 1,
+        type: UserType.Standard,
+        isFirstPurchase: false,
+        savedCartItems: []
+      }
+      const cartManager = new CartManager(user)
+
+      const actual = cartManager.updateCart(1, 2)
+
+      expect(actual.success).toBeTruthy()
+      expect(actual.message).toEqual('Cart updated successfully.')
+    })
+  })
 })
