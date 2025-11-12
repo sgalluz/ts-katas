@@ -3,6 +3,7 @@ import { UserProfile } from './models/UserProfile'
 import { ILogger } from './services/Logger'
 import { DiscountCalculator } from './services/DiscountCalculator'
 import { ShippingCalculator } from './services/ShippingCalculator'
+import { INotifier } from './services/Notifier'
 
 
 // The God Class
@@ -19,6 +20,7 @@ export class CartManager {
         private readonly userProfile: UserProfile, // Still depends on an entire profile, just implementing DI via constructor
         private readonly discountCalculator: DiscountCalculator,
         private readonly shippingCalculator: ShippingCalculator,
+        private readonly notifier: INotifier,
         private readonly logger: ILogger
   ) {
     // Responsibility 6: Initial State Loading
@@ -118,9 +120,8 @@ export class CartManager {
 
     const finalTotal = totalAfterDiscount + shippingCost
 
-    // 5. Notification/side effect (Responsibility 5)
     if (finalTotal > 500 && this.items.length > 5) {
-      this.sendHighValueOrderAlert(finalTotal)
+      this.notifier.sendHighValueOrderAlert(this.userProfile.id, finalTotal)
     }
 
     return {
@@ -129,13 +130,5 @@ export class CartManager {
       shippingCost: shippingCost,
       finalTotal: finalTotal
     }
-  }
-
-  /**
-     * Another private side effect.
-     */
-  private sendHighValueOrderAlert(amount: number): void {
-    this.logger.log(`*** NOTIFICATION ***: User ${this.userProfile.id} has a high-value cart: ${amount}`)
-    // Send an email to the administrator...
   }
 }

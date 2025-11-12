@@ -5,6 +5,7 @@ import { IShippingService } from './services/ShippingService'
 import { Logger } from './services/Logger'
 import { DiscountCalculator } from './services/DiscountCalculator'
 import { ShippingCalculator } from './services/ShippingCalculator'
+import { Notifier } from './services/Notifier'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = () => {
@@ -62,7 +63,8 @@ const mockLogger: jest.Mocked<Logger> = { log: jest.fn(), warn: jest.fn() }
 const buildCartManager = (user: UserProfile) => {
   const discountCalculator = new DiscountCalculator(mockDiscountService)
   const shippingCalculator = new ShippingCalculator(mockShippingService)
-  return new CartManager(user, discountCalculator, shippingCalculator, mockLogger)
+  const notifier = new Notifier(mockLogger)
+  return new CartManager(user, discountCalculator, shippingCalculator, notifier, mockLogger)
 }
 
 describe('CartManager', () => {
