@@ -1,5 +1,5 @@
-import { IShippingService, ShippingService } from './services/ShippingService'
-import { DiscountService, IDiscountService } from './services/DiscountService'
+import { IShippingService } from './services/ShippingService'
+import { IDiscountService } from './services/DiscountService'
 import { Product } from './models/Product'
 import { UserProfile, UserType } from './models/UserProfile'
 import { ILogger } from './services/Logger'
@@ -10,24 +10,26 @@ export class CartManager {
   private items: { product: Product, quantity: number }[] = []
   private shippingAddress = ''
   private appliedCouponCode: string | null = null
-  private userProfile: UserProfile // Now depends on an entire profile
 
   /**
      * Constructor with initialization logic that loads data
      * and has side effects (logging).
      */
-  constructor(userProfile: UserProfile, private discountService?: IDiscountService, private shippingService?: IShippingService, private logger?: ILogger) {
-    this.userProfile = userProfile
-
+  constructor(
+        private readonly userProfile: UserProfile, // Still depends on an entire profile, just implementing DI via constructor
+        private readonly discountService: IDiscountService,
+        private readonly shippingService: IShippingService,
+        private readonly logger: ILogger
+  ) {
     // Responsibility 6: Initial State Loading
-    if (userProfile.savedCartItems.length > 0) {
-      console.log(`Loading ${userProfile.savedCartItems.length} saved items for user ${userProfile.id}`)
+    if (this.userProfile.savedCartItems.length > 0) {
+      this.logger.log(`Loading ${this.userProfile.savedCartItems.length} saved items for user ${this.userProfile.id}`)
       // Simulation of complex merge logic with current in-memory products
-      this.loadInitialCart(userProfile.savedCartItems)
+      this.loadInitialCart(this.userProfile.savedCartItems)
     }
 
     // Side effect/Implicit initialization that makes instantiation difficult
-    this.logCartInitialization(userProfile.id)
+    this.logCartInitialization(this.userProfile.id)
   }
 
   /**
@@ -52,7 +54,7 @@ export class CartManager {
      */
   private logCartInitialization(userId: number): void {
     // Simulates writing to an external log file
-    console.log(`[LOGGING] Cart initialized for user: ${userId}.`)
+    this.logger.log(`[LOGGING] Cart initialized for user: ${userId}.`)
   }
 
   /**
@@ -107,7 +109,7 @@ export class CartManager {
 
     // Discount Calculation: has a strict dependency with UserProfile type (Responsibility 3)
     if (this.appliedCouponCode) {
-      const discountValue = DiscountService.validateCoupon(
+      const discountValue = this.discountService.validateCoupon(
         this.appliedCouponCode,
         subtotal,
         this.userProfile.type
@@ -127,7 +129,7 @@ export class CartManager {
 
     // 4. Shipping Calculation (Responsibility 4)
     if (totalAfterDiscount < 50 && this.shippingAddress) {
-      shippingCost = ShippingService.calculate(this.shippingAddress, totalWeight)
+      shippingCost = this.shippingService.calculate(this.shippingAddress, totalWeight)
     } else if (this.appliedCouponCode === 'FREE_SHIPPING' || totalAfterDiscount >= 100) {
       shippingCost = 0
     } else {
@@ -136,7 +138,7 @@ export class CartManager {
 
     // Addition: Financial validation logic (Responsibility 8)
     if (this.userProfile.type === UserType.Guest && subtotal > 200) {
-      console.warn('Guest transaction exceeds limit. Applying extra fee.')
+      this.logger.warn('Guest transaction exceeds limit. Applying extra fee.')
       shippingCost += 10
     }
 
@@ -159,7 +161,7 @@ export class CartManager {
      * Another private side effect.
      */
   private sendHighValueOrderAlert(amount: number): void {
-    console.log(`*** NOTIFICATION ***: User ${this.userProfile.id} has a high-value cart: ${amount}`)
+    this.logger.log(`*** NOTIFICATION ***: User ${this.userProfile.id} has a high-value cart: ${amount}`)
     // Send an email to the administrator...
   }
 }
