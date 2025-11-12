@@ -3,6 +3,8 @@ import { UserProfile, UserType } from './models/UserProfile'
 import { IDiscountService } from './services/DiscountService'
 import { IShippingService } from './services/ShippingService'
 import { Logger } from './services/Logger'
+import { DiscountCalculator } from './services/DiscountCalculator'
+import { ShippingCalculator } from './services/ShippingCalculator'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = () => {
@@ -57,9 +59,11 @@ const mockDiscountService: jest.Mocked<IDiscountService> = { validateCoupon: jes
 const mockShippingService: jest.Mocked<IShippingService> = { calculate: jest.fn() }
 const mockLogger: jest.Mocked<Logger> = { log: jest.fn(), warn: jest.fn() }
 
-const buildCartManager = (user: UserProfile) => new CartManager(
-  user, mockDiscountService, mockShippingService, mockLogger
-)
+const buildCartManager = (user: UserProfile) => {
+  const discountCalculator = new DiscountCalculator(mockDiscountService)
+  const shippingCalculator = new ShippingCalculator(mockShippingService)
+  return new CartManager(user, discountCalculator, shippingCalculator, mockLogger)
+}
 
 describe('CartManager', () => {
   describe('when invoking the constructor', () => {

@@ -1,8 +1,8 @@
-import { IShippingService } from './services/ShippingService'
-import { IDiscountService } from './services/DiscountService'
 import { Product } from './models/Product'
-import { UserProfile, UserType } from './models/UserProfile'
+import { UserProfile } from './models/UserProfile'
 import { ILogger } from './services/Logger'
+import { DiscountCalculator } from './services/DiscountCalculator'
+import { ShippingCalculator } from './services/ShippingCalculator'
 
 
 // The God Class
@@ -17,8 +17,8 @@ export class CartManager {
      */
   constructor(
         private readonly userProfile: UserProfile, // Still depends on an entire profile, just implementing DI via constructor
-        private readonly discountService: IDiscountService,
-        private readonly shippingService: IShippingService,
+        private readonly discountCalculator: DiscountCalculator,
+        private readonly shippingCalculator: ShippingCalculator,
         private readonly logger: ILogger
   ) {
     // Responsibility 6: Initial State Loading
@@ -101,46 +101,20 @@ export class CartManager {
      * Huge method that calculates everything (Responsibilities 3, 4, 5, 7, 8)
      */
   public getFinalSummary(): { total: number, discount: number, shippingCost: number, finalTotal: number } {
-
     const subtotal = this.items.reduce((acc, item) => acc + item.product.price * item.quantity, 0)
     const totalWeight = this.items.reduce((acc, item) => acc + item.product.weightKg * item.quantity, 0)
-    let discount = 0
-    let shippingCost = 0
 
-    // Discount Calculation: has a strict dependency with UserProfile type (Responsibility 3)
-    if (this.appliedCouponCode) {
-      const discountValue = this.discountService.validateCoupon(
-        this.appliedCouponCode,
-        subtotal,
-        this.userProfile.type
-      )
-
-      if (discountValue !== null) {
-        discount = discountValue
-      }
-    }
-
-    // Addition: First Purchase Discount (Responsibility 7)
-    if (this.userProfile.isFirstPurchase && this.userProfile.type === UserType.Standard) {
-      discount += subtotal * 0.10 // BUG: Adds up with coupon
-    }
+    const discount = this.discountCalculator.calculateDiscount(subtotal, this.userProfile, this.appliedCouponCode)
 
     const totalAfterDiscount = subtotal - discount
 
-    // 4. Shipping Calculation (Responsibility 4)
-    if (totalAfterDiscount < 50 && this.shippingAddress) {
-      shippingCost = this.shippingService.calculate(this.shippingAddress, totalWeight)
-    } else if (this.appliedCouponCode === 'FREE_SHIPPING' || totalAfterDiscount >= 100) {
-      shippingCost = 0
-    } else {
-      shippingCost = 15 // Base cost
-    }
-
-    // Addition: Financial validation logic (Responsibility 8)
-    if (this.userProfile.type === UserType.Guest && subtotal > 200) {
-      this.logger.warn('Guest transaction exceeds limit. Applying extra fee.')
-      shippingCost += 10
-    }
+    const shippingCost = this.shippingCalculator.calculateShipping(
+      totalAfterDiscount,
+      totalWeight,
+      this.shippingAddress,
+      this.userProfile,
+      this.appliedCouponCode
+    )
 
     const finalTotal = totalAfterDiscount + shippingCost
 
