@@ -20,15 +20,29 @@ describe('CartManager', () => {
     afterEach(() => jest.restoreAllMocks())
 
     it('should log the cart initialization and load the cart', () => {
+      const userId = 123
       const user: UserProfile = {
-        id: 1, type: UserType.Standard, isFirstPurchase: false,
+        id: userId, type: UserType.Standard, isFirstPurchase: false,
         savedCartItems: [{ productId: 1, quantity: 1 }]
       }
 
       new CartManager(user)
 
-      expect(logSpy).toHaveBeenCalledWith(1)
+      expect(logSpy).toHaveBeenCalledWith(userId)
       expect(loadCartSpy).toHaveBeenCalledWith(user.savedCartItems)
+    })
+
+    it('should not load the cart in case of no items previously saved in cart', () => {
+      const profile: UserProfile = {
+        id: 456,
+        type: UserType.Premium,
+        isFirstPurchase: true,
+        savedCartItems: []
+      }
+
+      new CartManager(profile)
+
+      expect(loadCartSpy).not.toHaveBeenCalled()
     })
   })
 })
