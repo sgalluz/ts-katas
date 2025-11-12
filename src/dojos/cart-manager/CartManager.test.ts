@@ -168,5 +168,25 @@ describe('CartManager', () => {
         finalTotal: 33
       })
     })
+
+    it('should not apply first purchase discount for premium users', () => {
+      const user: UserProfile = {
+        id: 6,
+        type: UserType.Premium,
+        isFirstPurchase: true,
+        savedCartItems: []
+      }
+      const cartManager = new CartManager(user)
+      cartManager.updateCart(2, 1)
+
+      const actual = cartManager.getFinalSummary()
+
+      expect(actual).toEqual({
+        total: 20,
+        discount: 0,
+        shippingCost: 15,
+        finalTotal: 35
+      })
+    })
   })
 })
