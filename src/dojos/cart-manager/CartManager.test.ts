@@ -78,5 +78,20 @@ describe('CartManager', () => {
       expect(actual.success).toBeTruthy()
       expect(actual.message).toEqual('Cart updated successfully.')
     })
+
+    it('should prevent VIP user from adding expensive product', () => {
+      const user: UserProfile = {
+        id: 999,
+        type: UserType.Premium,
+        isFirstPurchase: false,
+        savedCartItems: []
+      }
+      const cartManager = new CartManager(user)
+
+      const actual = cartManager.updateCart(11, 1)
+
+      expect(actual.success).toBeFalsy()
+      expect(actual.message).toEqual('VIP user 999 cannot purchase expensive items directly.')
+    })
   })
 })
