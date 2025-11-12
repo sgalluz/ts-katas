@@ -169,30 +169,13 @@ describe('CartManager', () => {
       })
     })
 
-    it('should not apply first purchase discount for premium users', () => {
-      const user: UserProfile = {
-        id: 6,
-        type: UserType.Premium,
-        isFirstPurchase: true,
-        savedCartItems: []
-      }
-      const cartManager = new CartManager(user)
-      cartManager.updateCart(2, 1)
-
-      const actual = cartManager.getFinalSummary()
-
-      expect(actual).toEqual({
-        total: 20,
-        discount: 0,
-        shippingCost: 15,
-        finalTotal: 35
-      })
-    })
-
-    it('should not apply first purchase discount for guest users', () => {
+    it.each([
+      { type: UserType.Premium, label: UserType.Premium.toLowerCase() },
+      { type: UserType.Guest, label: UserType.Guest.toLowerCase() },
+    ])('should not apply first purchase discount for $label users', ({ type }) => {
       const user: UserProfile = {
         id: 7,
-        type: UserType.Guest,
+        type,
         isFirstPurchase: true,
         savedCartItems: []
       }
