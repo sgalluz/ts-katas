@@ -1,7 +1,7 @@
 import { CartManager } from './CartManager'
 import { UserProfile, UserType } from './models/UserProfile'
-import { DiscountService, DiscountServiceV2 } from './services/DiscountService'
-import { ShippingService, ShippingServiceV2 } from './services/ShippingService'
+import { IDiscountService } from './services/DiscountService'
+import { IShippingService } from './services/ShippingService'
 import { Logger } from './services/Logger'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -53,11 +53,12 @@ class UserProfileBuilder {
 
 const aUser = () => new UserProfileBuilder()
 
+const mockDiscountService: jest.Mocked<IDiscountService> = { validateCoupon: jest.fn() }
+const mockShippingService: jest.Mocked<IShippingService> = { calculate: jest.fn() }
+const mockLogger: jest.Mocked<Logger> = { log: jest.fn(), warn: jest.fn() }
+
 const buildCartManager = (user: UserProfile) => new CartManager(
-  user,
-  new DiscountServiceV2(),
-  new ShippingServiceV2(),
-  new Logger()
+  user, mockDiscountService, mockShippingService, mockLogger
 )
 
 describe('CartManager', () => {
@@ -101,7 +102,6 @@ describe('CartManager', () => {
     })
 
     it('should log number of saved items being loaded', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
       const profile = aUser()
         .withId(100)
         .asStandard()
@@ -111,7 +111,7 @@ describe('CartManager', () => {
 
       buildCartManager(profile)
 
-      expect(consoleSpy).toHaveBeenCalledWith('Loading 2 saved items for user 100')
+      expect(mockLogger.log).toHaveBeenCalledWith('Loading 2 saved items for user 100')
     })
   })
 
@@ -226,18 +226,15 @@ describe('CartManager', () => {
     })
 
     describe('and interact with external services', () => {
-      let discountSpy: jest.SpyInstance,
-        shippingSpy: jest.SpyInstance
-
       beforeEach(() => {
-        discountSpy = jest.spyOn(DiscountService, 'validateCoupon')
-        shippingSpy = jest.spyOn(ShippingService, 'calculate')
+        mockDiscountService.validateCoupon.mockReturnValue(4)
+        mockShippingService.calculate.mockReturnValue(25)
       })
 
       afterEach(() => jest.clearAllMocks())
 
       it('should invoke discount service with correct user type and calculate total accordingly', () => {
-        discountSpy.mockReturnValue(4)
+        mockDiscountService.validateCoupon.mockReturnValue(4)
 
         const user = aUser()
           .withId(10)
@@ -254,12 +251,10 @@ describe('CartManager', () => {
           shippingCost: 15,
           finalTotal: 51
         })
-        expect(discountSpy).toHaveBeenCalledWith('TS_DOJO_20', 40, UserType.Premium)
+        expect(mockDiscountService.validateCoupon).toHaveBeenCalledWith('TS_DOJO_20', 40, UserType.Premium)
       })
 
       it('should calulate wieght-based shipping cost correctly', () => {
-        shippingSpy.mockReturnValue(25)
-
         const user = aUser()
           .withId(11)
           .build()
@@ -274,7 +269,7 @@ describe('CartManager', () => {
           shippingCost: 25,
           finalTotal: 65
         })
-        expect(shippingSpy).toHaveBeenCalledWith('123 Main St, Island City', 1)
+        expect(mockShippingService.calculate).toHaveBeenCalledWith('123 Main St, Island City', 1)
       })
     })
 
@@ -298,7 +293,6 @@ describe('CartManager', () => {
       })
 
       it('should send high value order alert for big orders', () => {
-        const consoleSpy = jest.spyOn(console, 'log')
         const user = aUser()
           .withId(12)
           .withSavedItems([
@@ -320,7 +314,7 @@ describe('CartManager', () => {
           shippingCost: 0,
           finalTotal: 550
         })
-        expect(consoleSpy).toHaveBeenCalledWith('*** NOTIFICATION ***: User 12 has a high-value cart: 550')
+        expect(mockLogger.log).toHaveBeenCalledWith('*** NOTIFICATION ***: User 12 has a high-value cart: 550')
       })
     })
   })
