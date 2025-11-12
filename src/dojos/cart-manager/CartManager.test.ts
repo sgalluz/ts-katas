@@ -44,5 +44,22 @@ describe('CartManager', () => {
 
       expect(loadCartSpy).not.toHaveBeenCalled()
     })
+
+    it('should log number of saved items being loaded', () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
+      const profile: UserProfile = {
+        id: 100,
+        type: UserType.Standard,
+        isFirstPurchase: false,
+        savedCartItems: [
+          { productId: 1, quantity: 1 },
+          { productId: 2, quantity: 2 }
+        ]
+      }
+
+      new CartManager(profile)
+
+      expect(consoleSpy).toHaveBeenCalledWith('Loading 2 saved items for user 100')
+    })
   })
 })
