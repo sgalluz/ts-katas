@@ -1,7 +1,8 @@
-import { ShippingService } from './services/ShippingService'
-import { DiscountService } from './services/DiscountService'
+import { IShippingService, ShippingService } from './services/ShippingService'
+import { DiscountService, IDiscountService } from './services/DiscountService'
 import { Product } from './models/Product'
 import { UserProfile, UserType } from './models/UserProfile'
+import { ILogger } from './services/Logger'
 
 
 // The God Class
@@ -15,7 +16,7 @@ export class CartManager {
      * Constructor with initialization logic that loads data
      * and has side effects (logging).
      */
-  constructor(userProfile: UserProfile) {
+  constructor(userProfile: UserProfile, private discountService?: IDiscountService, private shippingService?: IShippingService, private logger?: ILogger) {
     this.userProfile = userProfile
 
     // Responsibility 6: Initial State Loading

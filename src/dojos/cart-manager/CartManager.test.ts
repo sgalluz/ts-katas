@@ -1,7 +1,8 @@
 import { CartManager } from './CartManager'
 import { UserProfile, UserType } from './models/UserProfile'
-import { DiscountService } from './services/DiscountService'
-import { ShippingService } from './services/ShippingService'
+import { DiscountService, DiscountServiceV2 } from './services/DiscountService'
+import { ShippingService, ShippingServiceV2 } from './services/ShippingService'
+import { Logger } from './services/Logger'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = () => {
@@ -52,6 +53,13 @@ class UserProfileBuilder {
 
 const aUser = () => new UserProfileBuilder()
 
+const buildCartManager = (user: UserProfile) => new CartManager(
+  user,
+  new DiscountServiceV2(),
+  new ShippingServiceV2(),
+  new Logger()
+)
+
 describe('CartManager', () => {
   describe('when invoking the constructor', () => {
     let logSpy: jest.SpyInstance,
@@ -74,7 +82,7 @@ describe('CartManager', () => {
         .withSavedItem(1, 1)
         .build()
 
-      new CartManager(user)
+      buildCartManager(user)
 
       expect(logSpy).toHaveBeenCalledWith(userId)
       expect(loadCartSpy).toHaveBeenCalledWith(user.savedCartItems)
@@ -87,7 +95,7 @@ describe('CartManager', () => {
         .asFirstPurchase()
         .build()
 
-      new CartManager(profile)
+      buildCartManager(profile)
 
       expect(loadCartSpy).not.toHaveBeenCalled()
     })
@@ -101,7 +109,7 @@ describe('CartManager', () => {
         .withSavedItem(2, 2)
         .build()
 
-      new CartManager(profile)
+      buildCartManager(profile)
 
       expect(consoleSpy).toHaveBeenCalledWith('Loading 2 saved items for user 100')
     })
@@ -110,7 +118,7 @@ describe('CartManager', () => {
   describe('when updating the cart', () => {
     it('should add two pieces of the same product to the cart', () => {
       const user = aUser().build()
-      const cartManager = new CartManager(user)
+      const cartManager = buildCartManager(user)
 
       const actual = cartManager.updateCart(1, 2)
 
@@ -123,7 +131,7 @@ describe('CartManager', () => {
         .withId(999)
         .asPremium()
         .build()
-      const cartManager = new CartManager(user)
+      const cartManager = buildCartManager(user)
 
       const actual = cartManager.updateCart(11, 1)
 
@@ -136,7 +144,7 @@ describe('CartManager', () => {
         .withId(3)
         .withSavedItem(1, 2)
         .build()
-      const cartManager = new CartManager(user)
+      const cartManager = buildCartManager(user)
 
       const actual = cartManager.updateCart(1, 5)
 
@@ -149,7 +157,7 @@ describe('CartManager', () => {
         .withId(2)
         .withSavedItem(1, 2)
         .build()
-      const cartManager = new CartManager(user)
+      const cartManager = buildCartManager(user)
 
       const actual = cartManager.updateCart(1, 0)
 
@@ -165,7 +173,7 @@ describe('CartManager', () => {
     // A refactor without this test would likely have missed this edge case and introduced a regression.
     it('should return zero totals for an empty cart', () => {
       const user = aUser().withId(4).build()
-      const cartManager = new CartManager(user)
+      const cartManager = buildCartManager(user)
 
       const actual = cartManager.getFinalSummary()
 
@@ -182,7 +190,7 @@ describe('CartManager', () => {
         .withId(5)
         .asFirstPurchase()
         .build()
-      const cartManager = new CartManager(user)
+      const cartManager = buildCartManager(user)
       cartManager.updateCart(2, 1)
 
       const actual = cartManager.getFinalSummary()
@@ -205,7 +213,7 @@ describe('CartManager', () => {
         .build()
       user.type = type // Override type dopo build
 
-      const cartManager = new CartManager(user)
+      const cartManager = buildCartManager(user)
       cartManager.updateCart(2, 1)
 
       const actual = cartManager.getFinalSummary()
@@ -235,7 +243,7 @@ describe('CartManager', () => {
           .withId(10)
           .asPremium()
           .build()
-        const cartManager = new CartManager(user)
+        const cartManager = buildCartManager(user)
         cartManager.updateCart(4, 1, 'TS_DOJO_20')
 
         const actual = cartManager.getFinalSummary()
@@ -255,7 +263,7 @@ describe('CartManager', () => {
         const user = aUser()
           .withId(11)
           .build()
-        const cartManager = new CartManager(user)
+        const cartManager = buildCartManager(user)
         cartManager.updateCart(4, 1, undefined, '123 Main St, Island City')
 
         const actual = cartManager.getFinalSummary()
@@ -276,7 +284,7 @@ describe('CartManager', () => {
           .withId(11)
           .asGuest()
           .build()
-        const cartManager = new CartManager(user)
+        const cartManager = buildCartManager(user)
         cartManager.updateCart(5, 5)
 
         const actual = cartManager.getFinalSummary()
@@ -301,7 +309,7 @@ describe('CartManager', () => {
             { productId: 5, quantity: 1 },
           ])
           .build()
-        const cartManager = new CartManager(user)
+        const cartManager = buildCartManager(user)
         cartManager.updateCart(6, 1)
 
         const actual = cartManager.getFinalSummary()
