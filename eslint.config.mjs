@@ -1,7 +1,7 @@
 // @ts-check
 
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
+import eslint from '@eslint/js'
+import tseslint from 'typescript-eslint'
 import stylisticJs from '@stylistic/eslint-plugin-js'
 
 export default tseslint.config(
@@ -18,7 +18,8 @@ export default tseslint.config(
       '@stylistic/js/no-extra-parens': 'error',
       '@stylistic/js/no-trailing-spaces': 'error',
       '@stylistic/js/object-curly-spacing': ['error', 'always'],
-      '@stylistic/js/quotes': ['error', 'single', { 'allowTemplateLiterals': true }]
+      '@stylistic/js/quotes': ['error', 'single', { 'allowTemplateLiterals': true }],
+      '@stylistic/js/semi': ['error', 'never']
     }
   }
-);
+)

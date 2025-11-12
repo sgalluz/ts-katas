@@ -3,6 +3,6 @@ const config = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   }
-};
+}
 
-export default config;
+export default config

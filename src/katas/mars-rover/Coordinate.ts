@@ -3,14 +3,14 @@ export class Coordinate {
   }
 
   get x(): number {
-    return this._x;
+    return this._x
   }
 
   get y(): number {
-    return this._y;
+    return this._y
   }
 
   equals(other: Coordinate): boolean {
-    return this.x === other.x && this.y === other.y;
+    return this.x === other.x && this.y === other.y
   }
 }
