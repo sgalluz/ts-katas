@@ -188,5 +188,24 @@ describe('CartManager', () => {
         finalTotal: 35
       })
     })
+
+    it('should not apply first purchase discount for guest users', () => {
+      const user: UserProfile = {
+        id: 7,
+        type: UserType.Guest,
+        isFirstPurchase: true,
+        savedCartItems: []
+      }
+      const cartManager = new CartManager(user)
+      cartManager.updateCart(2, 1)
+
+      const actual = cartManager.getFinalSummary()
+      expect(actual).toEqual({
+        total: 20,
+        discount: 0,
+        shippingCost: 15,
+        finalTotal: 35
+      })
+    })
   })
 })
