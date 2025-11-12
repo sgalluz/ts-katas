@@ -1,4 +1,4 @@
-# REFACTORING DOJO: CART MANAGER
+# Cart Manager - Testing and Refactoring Legacy Code
 
 ## Overview
 
@@ -38,8 +38,19 @@ Participants will learn to:
 ### Prerequisites
 
 - TypeScript development environment
-- Testing framework (Jest or Mocha/Chai) configured with code coverage support
+- Testing framework (Jest) configured with code coverage support
 - Basic understanding of refactoring principles and test-driven development
+
+### Useful snippets
+
+- Run tests with "watch mode" enabled:
+    ```bash
+        jest src/dojos/cart-manager --watch
+    ```
+- Run tests with coverage report:
+  ```bash
+    jest src/dojos/cart-manager --coverage
+  ```
 
 ------------------------------------------------
 

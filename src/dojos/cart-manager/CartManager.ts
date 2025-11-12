@@ -1,74 +1,44 @@
-// --- Dipendenze Esterne (Interfacce e Tipi) ---
-
-import { ShippingService } from './ShippingService'
-import { DiscountService } from './DiscountService'
-
-/**
- * Simula un prodotto base del sistema.
- */
-interface Product {
-    id: number;
-    name: string;
-    price: number;
-    weightKg: number;
-}
-
-/**
- * Tipi di utente che influenzano la logica di sconto.
- */
-enum UserType {
-    Guest = 'GUEST',
-    Standard = 'STANDARD',
-    Premium = 'PREMIUM'
-}
-
-/**
- * Il profilo utente, necessario nel costruttore.
- */
-interface UserProfile {
-    id: number;
-    type: UserType;
-    isFirstPurchase: boolean;
-    // Dati caricati dal DB che complicano l'inizializzazione
-    savedCartItems: { productId: number, quantity: number }[];
-}
+import { ShippingService } from './services/ShippingService'
+import { DiscountService } from './services/DiscountService'
+import { Product } from './models/Product'
+import { UserProfile, UserType } from './models/UserProfile'
 
 
-// --- La Classe Dio (Spaghetti Code V2) ---
+// The God Class
 export class CartManager {
   private items: { product: Product, quantity: number }[] = []
   private shippingAddress = ''
   private appliedCouponCode: string | null = null
-  private userProfile: UserProfile // Ora dipende da un intero profilo
+  private userProfile: UserProfile // Now depends on an entire profile
 
   /**
-     * Costruttore con logica di inizializzazione che carica i dati
-     * e ha side-effects (logging).
+     * Constructor with initialization logic that loads data
+     * and has side effects (logging).
      */
   constructor(userProfile: UserProfile) {
     this.userProfile = userProfile
 
-    // Responsabilità 6: Caricamento Stato Iniziale
+    // Responsibility 6: Initial State Loading
     if (userProfile.savedCartItems.length > 0) {
-      console.log(`Caricamento ${userProfile.savedCartItems.length} articoli salvati per utente ${userProfile.id}`)
-      // Simulazione di logica complessa di merge con prodotti attuali in memoria
+      console.log(`Loading ${userProfile.savedCartItems.length} saved items for user ${userProfile.id}`)
+      // Simulation of complex merge logic with current in-memory products
       this.loadInitialCart(userProfile.savedCartItems)
     }
 
-    // Side effect/Inizializzazione implicita che rende difficile l'istanziamento
+    // Side effect/Implicit initialization that makes instantiation difficult
     this.logCartInitialization(userProfile.id)
   }
 
   /**
-     * Metodo privato di helper che complica il test del costruttore.
-     * Simula il recupero e la validazione di dati.
+     * Private helper method that complicates constructor testing.
+     * Simulates data retrieval and validation.
      */
   private loadInitialCart(savedItems: { productId: number, quantity: number }[]) {
     savedItems.forEach(item => {
-      // Simula il recupero del prodotto dal DB (un'altra dipendenza nascosta!)
+      // Simulates product retrieval from DB (another hidden dependency!)
       const product: Product = {
         id: item.productId,
-        name: `Prodotto ${item.productId}`,
+        name: `Product ${item.productId}`,
         price: item.productId * 10,
         weightKg: 1
       }
@@ -77,15 +47,15 @@ export class CartManager {
   }
 
   /**
-     * Side effect nel costruttore.
+     * Side effect in the constructor.
      */
   private logCartInitialization(userId: number): void {
-    // Simula la scrittura su un log file esterno
-    console.log(`[LOGGING] Carrello inizializzato per utente: ${userId}.`)
+    // Simulates writing to an external log file
+    console.log(`[LOGGING] Cart initialized for user: ${userId}.`)
   }
 
   /**
-     * Metodo enorme che fa troppe cose (CRUD + Business Logic)
+     * Huge method that does too many things (CRUD + Business Logic)
      */
   public updateCart(
     productId: number,
@@ -94,16 +64,16 @@ export class CartManager {
     address = ''
   ): { success: boolean, message: string } {
 
-    // 1. Gestione del Carrello (Responsabilità 1)
-    // Simula il recupero del prodotto (in V2, questo è ancora peggio)
-    const product: Product = { id: productId, name: `Prodotto ${productId}`, price: productId * 10, weightKg: 1 }
+    // 1. Cart Management (Responsibility 1)
+    // Simulates product retrieval
+    const product: Product = { id: productId, name: `Product ${productId}`, price: productId * 10, weightKg: 1 }
     const existingItem = this.items.find(item => item.product.id === productId)
 
     if (quantity <= 0) {
       if (existingItem) {
         this.items = this.items.filter(item => item.product.id !== productId)
       }
-      return { success: true, message: 'Articolo rimosso o quantità zero ignorata.' }
+      return { success: true, message: 'Item removed or zero quantity ignored.' }
     }
 
     if (existingItem) {
@@ -112,20 +82,20 @@ export class CartManager {
       this.items.push({ product, quantity })
     }
 
-    // 2. Aggiornamento Stili di Vita (Side effects impliciti)
+    // 2. Lifestyle Updates (Implicit side effects)
     this.appliedCouponCode = couponCode
     this.shippingAddress = address
 
-    // 3. Controllo Logica (Responsabilità 2: Validazione)
-    if (this.userProfile.id === 999 && product.price > 100) { // Usa this.userProfile.id
-      return { success: false, message: 'L\'utente VIP 999 non può acquistare articoli costosi direttamente.' }
+    // 3. Logic Control (Responsibility 2: Validation)
+    if (this.userProfile.id === 999 && product.price > 100) { // Uses this.userProfile.id
+      return { success: false, message: 'VIP user 999 cannot purchase expensive items directly.' }
     }
 
-    return { success: true, message: 'Carrello aggiornato con successo.' }
+    return { success: true, message: 'Cart updated successfully.' }
   }
 
   /**
-     * Metodo enorme che calcola tutto (Responsabilità 3, 4, 5, 7, 8)
+     * Huge method that calculates everything (Responsibilities 3, 4, 5, 7, 8)
      */
   public getFinalSummary(): { total: number, discount: number, shippingCost: number, finalTotal: number } {
 
@@ -134,7 +104,7 @@ export class CartManager {
     let discount = 0
     let shippingCost = 0
 
-    // 3. Calcolo Sconto: L'interazione è più complessa (dipendenza da userProfile.type)
+    // Discount Calculation: has a strict dependency with UserProfile type (Responsibility 3)
     if (this.appliedCouponCode) {
       const discountValue = DiscountService.validateCoupon(
         this.appliedCouponCode,
@@ -147,31 +117,31 @@ export class CartManager {
       }
     }
 
-    // Aggiunta: Sconto First Purchase (Responsabilità 7)
+    // Addition: First Purchase Discount (Responsibility 7)
     if (this.userProfile.isFirstPurchase && this.userProfile.type === UserType.Standard) {
-      discount += subtotal * 0.10 // BUG: Si somma al coupon
+      discount += subtotal * 0.10 // BUG: Adds up with coupon
     }
 
     const totalAfterDiscount = subtotal - discount
 
-    // 4. Calcolo Spedizione (Responsabilità 4)
+    // 4. Shipping Calculation (Responsibility 4)
     if (totalAfterDiscount < 50 && this.shippingAddress) {
       shippingCost = ShippingService.calculate(this.shippingAddress, totalWeight)
     } else if (this.appliedCouponCode === 'FREE_SHIPPING' || totalAfterDiscount >= 100) {
       shippingCost = 0
     } else {
-      shippingCost = 15 // Costo base
+      shippingCost = 15 // Base cost
     }
 
-    // Aggiunta: Logica di validazione finanziaria (Responsabilità 8)
+    // Addition: Financial validation logic (Responsibility 8)
     if (this.userProfile.type === UserType.Guest && subtotal > 200) {
-      console.warn('Transazione ospite superiore al limite. Applica fee extra.')
+      console.warn('Guest transaction exceeds limit. Applying extra fee.')
       shippingCost += 10
     }
 
     const finalTotal = totalAfterDiscount + shippingCost
 
-    // 5. Notifica/side-effect (Responsabilità 5)
+    // 5. Notification/side effect (Responsibility 5)
     if (finalTotal > 500 && this.items.length > 5) {
       this.sendHighValueOrderAlert(finalTotal)
     }
@@ -185,10 +155,10 @@ export class CartManager {
   }
 
   /**
-     * Altro side effect privato.
+     * Another private side effect.
      */
   private sendHighValueOrderAlert(amount: number): void {
-    console.log(`*** NOTIFICA ***: L'utente ${this.userProfile.id} ha un carrello di valore elevato: ${amount}`)
-    // Invia una email all'amministratore...
+    console.log(`*** NOTIFICATION ***: User ${this.userProfile.id} has a high-value cart: ${amount}`)
+    // Send an email to the administrator...
   }
 }
