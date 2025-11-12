@@ -1,5 +1,7 @@
 import { CartManager } from './CartManager'
 import { UserProfile, UserType } from './models/UserProfile'
+import { DiscountService } from './services/DiscountService'
+import { ShippingService } from './services/ShippingService'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = () => {
@@ -188,6 +190,64 @@ describe('CartManager', () => {
         discount: 0,
         shippingCost: 15,
         finalTotal: 35
+      })
+    })
+
+    describe('and interact with external services', () => {
+      let discountSpy: jest.SpyInstance,
+        shippingSpy: jest.SpyInstance
+
+      beforeEach(() => {
+        discountSpy = jest.spyOn(DiscountService, 'validateCoupon')
+        shippingSpy = jest.spyOn(ShippingService, 'calculate')
+      })
+
+      afterEach(() => jest.clearAllMocks())
+
+      it('should invoke discount service with correct user type and calculate total accordingly', () => {
+        discountSpy.mockReturnValue(4)
+
+        const user: UserProfile = {
+          id: 10,
+          type: UserType.Premium,
+          isFirstPurchase: false,
+          savedCartItems: []
+        }
+        const cartManager = new CartManager(user)
+        cartManager.updateCart(4, 1, 'TS_DOJO_20')
+
+        const actual = cartManager.getFinalSummary()
+
+        expect(actual).toEqual({
+          total: 40,
+          discount: 4,
+          shippingCost: 15,
+          finalTotal: 51
+        })
+        expect(discountSpy).toHaveBeenCalledWith('TS_DOJO_20', 40, UserType.Premium)
+      })
+
+      it('should calulate wieght-based shipping cost correctly', () => {
+        shippingSpy.mockReturnValue(25)
+
+        const user: UserProfile = {
+          id: 11,
+          type: UserType.Standard,
+          isFirstPurchase: false,
+          savedCartItems: []
+        }
+        const cartManager = new CartManager(user)
+        cartManager.updateCart(4, 1, undefined, '123 Main St, Island City')
+
+        const actual = cartManager.getFinalSummary()
+
+        expect(actual).toEqual({
+          total: 40,
+          discount: 0,
+          shippingCost: 25,
+          finalTotal: 65
+        })
+        expect(shippingSpy).toHaveBeenCalledWith('123 Main St, Island City', 1)
       })
     })
   })
