@@ -108,5 +108,20 @@ describe('CartManager', () => {
       expect(actual.success).toBeTruthy()
       expect(actual.message).toEqual('Cart updated successfully.')
     })
+
+    it('should remove an item from the cart when its quantity is equal or less than zero', () => {
+      const user: UserProfile = {
+        id: 2,
+        type: UserType.Standard,
+        isFirstPurchase: false,
+        savedCartItems: [{ productId: 1, quantity: 2 }]
+      }
+      const cartManager = new CartManager(user)
+
+      const actual = cartManager.updateCart(1, 0)
+
+      expect(actual.success).toBeTruthy()
+      expect(actual.message).toEqual('Item removed or zero quantity ignored.')
+    })
   })
 })
