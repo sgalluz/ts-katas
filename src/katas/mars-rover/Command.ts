@@ -1,6 +1,6 @@
-import { Direction } from './Direction';
-import { Coordinate } from './Coordinate';
-import { Grid } from './Grid';
+import { Direction } from './Direction'
+import { Coordinate } from './Coordinate'
+import { Grid } from './Grid'
 
 export interface Command {
     execute(direction: Direction, coordinate: Coordinate): string;
@@ -23,10 +23,10 @@ export class Move implements Command {
   }
 
   execute(direction: Direction, coordinate: Coordinate): string {
-    const newCoordinate = this.grid.moveToNextCoordinateFrom(coordinate, direction.value);
+    const newCoordinate = this.grid.moveToNextCoordinateFrom(coordinate, direction.value)
     const hasObstacle = !newCoordinate || false
-    const obstaclePrefix = hasObstacle ? 'O:' : '';
-    const { x, y } = hasObstacle ? coordinate : newCoordinate;
-    return `${obstaclePrefix}${x}:${y}:${direction.value}`;
+    const obstaclePrefix = hasObstacle ? 'O:' : ''
+    const { x, y } = hasObstacle ? coordinate : newCoordinate
+    return `${obstaclePrefix}${x}:${y}:${direction.value}`
   }
 }
