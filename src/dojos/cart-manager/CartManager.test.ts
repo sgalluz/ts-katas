@@ -250,5 +250,55 @@ describe('CartManager', () => {
         expect(shippingSpy).toHaveBeenCalledWith('123 Main St, Island City', 1)
       })
     })
+
+    describe('and order total exceeds free validation thresholds', () => {
+      it('should apply extra fees for orders above $200', () => {
+        const user: UserProfile = {
+          id: 11,
+          type: UserType.Guest,
+          isFirstPurchase: false,
+          savedCartItems: []
+        }
+        const cartManager = new CartManager(user)
+        cartManager.updateCart(5, 5)
+
+        const actual = cartManager.getFinalSummary()
+
+        expect(actual).toEqual({
+          total: 250,
+          discount: 0,
+          shippingCost: 10,
+          finalTotal: 260
+        })
+      })
+
+      it('should send high value order alert for big orders', () => {
+        const user: UserProfile = {
+          id: 12,
+          type: UserType.Standard,
+          isFirstPurchase: false,
+          savedCartItems: [
+            { productId: 1, quantity: 10 },
+            { productId: 2, quantity: 5 },
+            { productId: 3, quantity: 4 },
+            { productId: 4, quantity: 3 },
+            { productId: 5, quantity: 1 },
+          ]
+        }
+        const cartManager = new CartManager(user)
+        cartManager.updateCart(6, 1)
+        const consoleSpy = jest.spyOn(console, 'log')
+
+        const actual = cartManager.getFinalSummary()
+
+        expect(actual).toEqual({
+          total: 550,
+          discount: 0,
+          shippingCost: 0,
+          finalTotal: 550
+        })
+        expect(consoleSpy).toHaveBeenCalledWith('*** NOTIFICATION ***: User 12 has a high-value cart: 550')
+      })
+    })
   })
 })
