@@ -1,5 +1,5 @@
 import { Logger } from './Logger'
-import { ProductRepository } from './ProductRepository'
+import { ProductRepository } from '../repositories/ProductRepository'
 import { UserProfile, UserType } from '../models/UserProfile'
 import { IDiscountCalculator } from './DiscountCalculator'
 import { Notifier } from './Notifier'
