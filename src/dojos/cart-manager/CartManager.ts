@@ -4,13 +4,11 @@ import { ILogger } from './services/Logger'
 import { IDiscountCalculator } from './services/DiscountCalculator'
 import { IShippingCalculator } from './services/ShippingCalculator'
 import { INotifier } from './services/Notifier'
-import { ICartItemsLoader } from './services/CartItemsLoader'
 import { CartItem } from './models/CartItem'
 
 
 // The God Class
 export class CartManager {
-  private items: { product: Product, quantity: number }[] = []
   private shippingAddress = ''
   private appliedCouponCode: string | null = null
 
@@ -20,17 +18,12 @@ export class CartManager {
      */
   constructor(
         private readonly userProfile: UserProfile, // Still depends on an entire profile, just implementing DI via constructor
-        private readonly cartItemsLoader: ICartItemsLoader,
-        private readonly initialItems: CartItem[],
+        private items: CartItem[],
         private readonly discountCalculator: IDiscountCalculator,
         private readonly shippingCalculator: IShippingCalculator,
         private readonly notifier: INotifier,
         private readonly logger: ILogger
   ) {
-    if (this.userProfile.savedCartItems.length > 0) {
-      this.logger.log(`Loading ${this.userProfile.savedCartItems.length} saved items for user ${this.userProfile.id}`)
-      this.items = this.cartItemsLoader.loadItems(this.userProfile.savedCartItems)
-    }
     this.logger.log(`[LOGGING] Cart initialized for user: ${this.userProfile.id}.`)
   }
 

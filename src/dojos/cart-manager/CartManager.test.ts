@@ -6,8 +6,7 @@ import { Logger } from './services/Logger'
 import { DiscountCalculator } from './services/DiscountCalculator'
 import { ShippingCalculator } from './services/ShippingCalculator'
 import { Notifier } from './services/Notifier'
-import { CartItemsLoader } from './services/CartItemsLoader'
-import { ProductRepository } from './repositories/ProductRepository'
+import { Product } from './models/Product'
 
 class UserProfileBuilder {
   private profile: UserProfile = { id: 1, type: UserType.Standard, isFirstPurchase: false, savedCartItems: [] }
@@ -57,24 +56,24 @@ const aUser = () => new UserProfileBuilder()
 const mockDiscountService: jest.Mocked<IDiscountService> = { validateCoupon: jest.fn() }
 const mockShippingService: jest.Mocked<IShippingService> = { calculate: jest.fn() }
 const mockLogger: jest.Mocked<Logger> = { log: jest.fn(), warn: jest.fn() }
-const mockProductRepository: jest.Mocked<ProductRepository> = { getProductById: jest.fn() }
 
 const buildCartManager = (user: UserProfile) => {
-  const cartItemLoader = new CartItemsLoader(mockProductRepository)
   const discountCalculator = new DiscountCalculator(mockDiscountService)
   const shippingCalculator = new ShippingCalculator(mockShippingService)
   const notifier = new Notifier(mockLogger)
-  return new CartManager(user, cartItemLoader, [], discountCalculator, shippingCalculator, notifier, mockLogger)
+
+  const items = user.savedCartItems.map(({ productId, quantity }) => ({
+    product: buildProduct(productId), quantity
+  }))
+
+  return new CartManager(user, items, discountCalculator, shippingCalculator, notifier, mockLogger)
 }
 
-describe('CartManager', () => {
-  beforeEach(() => mockProductRepository.getProductById.mockImplementation((productId: number) => ({
-    id: productId,
-    name: `Product ${productId}`,
-    price: productId * 10,
-    weightKg: 1
-  })))
+const buildProduct = (id: number): Product => ({
+  id, name: `Product ${id}`, price: id * 10, weightKg: 1
+})
 
+describe('CartManager', () => {
   afterEach(() => jest.clearAllMocks())
 
   describe('when invoking the constructor', () => {
@@ -89,7 +88,6 @@ describe('CartManager', () => {
       buildCartManager(user)
 
       expect(mockLogger.log).toHaveBeenCalledWith(`[LOGGING] Cart initialized for user: ${userId}.`)
-      expect(mockProductRepository.getProductById).toHaveBeenCalledWith(1)
     })
 
     it('should not load the cart in case of no items previously saved in cart', () => {
@@ -102,7 +100,6 @@ describe('CartManager', () => {
       buildCartManager(profile)
 
       expect(mockLogger.log).toHaveBeenCalledWith('[LOGGING] Cart initialized for user: 456.')
-      expect(mockProductRepository.getProductById).not.toHaveBeenCalled()
     })
 
     it('should log number of saved items being loaded and retrieve each product', () => {
@@ -115,11 +112,7 @@ describe('CartManager', () => {
 
       buildCartManager(profile)
 
-      expect(mockLogger.log).toHaveBeenCalledWith('Loading 2 saved items for user 100')
       expect(mockLogger.log).toHaveBeenCalledWith('[LOGGING] Cart initialized for user: 100.')
-      expect(mockProductRepository.getProductById).toHaveBeenCalledTimes(2)
-      expect(mockProductRepository.getProductById).toHaveBeenCalledWith(1)
-      expect(mockProductRepository.getProductById).toHaveBeenCalledWith(2)
     })
   })
 
