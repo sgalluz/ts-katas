@@ -11,7 +11,7 @@ import { CheckoutOptions } from './models/CheckoutOptions'
 
 export class CartManager {
   constructor(
-        private readonly userProfile: UserProfile, // Still depends on an entire profile, just implementing DI via constructor
+        private readonly userProfile: UserProfile,
         private readonly cartItems: CartItems,
         private readonly productRepository: ProductRepository,
         private readonly discountCalculator: IDiscountCalculator,
@@ -47,11 +47,11 @@ export class CartManager {
   }
 
   private generateSummary(couponCode: string | null, shippingAddress: string) {
-    const subtotal = this.cartItems.totalPrice
+    const total = this.cartItems.totalPrice
 
-    const discount = this.discountCalculator.calculateDiscount(subtotal, this.userProfile, couponCode)
+    const discount = this.discountCalculator.calculateDiscount(total, this.userProfile, couponCode)
 
-    const totalAfterDiscount = subtotal - discount
+    const totalAfterDiscount = total - discount
 
     const shippingCost = this.shippingCalculator.calculateShipping({
       totalPrice: totalAfterDiscount,
@@ -62,6 +62,7 @@ export class CartManager {
     })
 
     const finalTotal = totalAfterDiscount + shippingCost
-    return { total: subtotal, discount, shippingCost, finalTotal }
+
+    return { total, discount, shippingCost, finalTotal }
   }
 }
