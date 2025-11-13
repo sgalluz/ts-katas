@@ -22,12 +22,15 @@ const buildCartFactory = (): CartFactory => new CartFactory(
 )
 
 describe('CartFactory', () => {
-  beforeEach(() => mockProductRepository.getProductById.mockImplementation((productId: number) => ({
-    id: productId,
-    name: `Product ${productId}`,
-    price: productId * 10,
-    weightKg: 1
-  })))
+  beforeEach(() =>
+    mockProductRepository.getProductById
+      .mockImplementation((productId: number) => ({
+        id: productId,
+        name: `Product ${productId}`,
+        price: productId * 10,
+        weightKg: 1
+      }))
+  )
 
   afterEach(() => jest.clearAllMocks())
 

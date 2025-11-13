@@ -23,6 +23,11 @@ class UserProfileBuilder {
     return this
   }
 
+  withType(type: UserType): this {
+    this.profile.type = type
+    return this
+  }
+
   asFirstPurchase(): this {
     this.profile.isFirstPurchase = true
     return this

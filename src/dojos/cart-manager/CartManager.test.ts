@@ -27,7 +27,16 @@ const buildCartManager = (user: UserProfile) => {
     product: buildProduct(productId), quantity
   }))
 
-  return new CartManager(user, new CartItems(items), mockProductRepository, discountCalculator, shippingCalculator, cartValidator, notifier, mockLogger)
+  return new CartManager(
+    user,
+    new CartItems(items),
+    mockProductRepository,
+    discountCalculator,
+    shippingCalculator,
+    cartValidator,
+    notifier,
+    mockLogger
+  )
 }
 
 const buildProduct = (id: number): Product => ({
@@ -82,9 +91,8 @@ describe('CartManager', () => {
   describe('when updating the cart', () => {
     it('should add two pieces of the same product to the cart', () => {
       const user = aUser().build()
-      const cartManager = buildCartManager(user)
 
-      const actual = cartManager.updateCart(1, 2)
+      const actual = buildCartManager(user).updateCart(1, 2)
 
       expect(actual.success).toBeTruthy()
       expect(actual.message).toEqual('Cart updated successfully.')
@@ -95,9 +103,8 @@ describe('CartManager', () => {
         .withId(999)
         .asPremium()
         .build()
-      const cartManager = buildCartManager(user)
 
-      const actual = cartManager.updateCart(11, 1)
+      const actual = buildCartManager(user).updateCart(11, 1)
 
       expect(actual.success).toBeFalsy()
       expect(actual.message).toEqual('VIP user 999 cannot purchase expensive items directly.')
@@ -108,9 +115,8 @@ describe('CartManager', () => {
         .withId(3)
         .withSavedItem(1, 2)
         .build()
-      const cartManager = buildCartManager(user)
 
-      const actual = cartManager.updateCart(1, 5)
+      const actual = buildCartManager(user).updateCart(1, 5)
 
       expect(actual.success).toBeTruthy()
       expect(actual.message).toEqual('Cart updated successfully.')
@@ -121,9 +127,8 @@ describe('CartManager', () => {
         .withId(2)
         .withSavedItem(1, 2)
         .build()
-      const cartManager = buildCartManager(user)
 
-      const actual = cartManager.updateCart(1, 0)
+      const actual = buildCartManager(user).updateCart(1, 0)
 
       expect(actual.success).toBeTruthy()
       expect(actual.message).toEqual('Item removed or zero quantity ignored.')
@@ -137,9 +142,8 @@ describe('CartManager', () => {
     // A refactor without this test would likely have missed this edge case and introduced a regression.
     it('should return zero totals for an empty cart', () => {
       const user = aUser().withId(4).build()
-      const cartManager = buildCartManager(user)
 
-      const actual = cartManager.getFinalSummary()
+      const actual = buildCartManager(user).getFinalSummary()
 
       expect(actual).toEqual({
         total: 0,
@@ -155,9 +159,8 @@ describe('CartManager', () => {
         .asFirstPurchase()
         .withSavedItem(2, 1)
         .build()
-      const cartManager = buildCartManager(user)
 
-      const actual = cartManager.getFinalSummary()
+      const actual = buildCartManager(user).getFinalSummary()
 
       expect(actual).toEqual({
         total: 20,
@@ -175,12 +178,11 @@ describe('CartManager', () => {
         .withId(7)
         .asFirstPurchase()
         .withSavedItem(2, 1)
+        .withType(type)
         .build()
-      user.type = type // Override type dopo build
 
-      const cartManager = buildCartManager(user)
+      const actual = buildCartManager(user).getFinalSummary()
 
-      const actual = cartManager.getFinalSummary()
       expect(actual).toEqual({
         total: 20,
         discount: 0,
@@ -198,16 +200,13 @@ describe('CartManager', () => {
       afterEach(() => jest.clearAllMocks())
 
       it('should invoke discount service with correct user type and calculate total accordingly', () => {
-        mockDiscountService.validateCoupon.mockReturnValue(4)
-
         const user = aUser()
           .withId(10)
           .asPremium()
           .withSavedItem(4, 1)
           .build()
-        const cartManager = buildCartManager(user)
 
-        const actual = cartManager.getFinalSummary({ couponCode: 'TS_DOJO_20' })
+        const actual = buildCartManager(user).getFinalSummary({ couponCode: 'TS_DOJO_20' })
 
         expect(actual).toEqual({
           total: 40,
@@ -223,9 +222,9 @@ describe('CartManager', () => {
           .withId(11)
           .withSavedItem(4, 1)
           .build()
-        const cartManager = buildCartManager(user)
 
-        const actual = cartManager.getFinalSummary({ shippingAddress: '123 Main St, Island City' })
+        const actual = buildCartManager(user)
+          .getFinalSummary({ shippingAddress: '123 Main St, Island City' })
 
         expect(actual).toEqual({
           total: 40,
@@ -244,9 +243,8 @@ describe('CartManager', () => {
           .asGuest()
           .withSavedItem(5, 5)
           .build()
-        const cartManager = buildCartManager(user)
 
-        const actual = cartManager.getFinalSummary()
+        const actual = buildCartManager(user).getFinalSummary()
 
         expect(actual).toEqual({
           total: 250,
@@ -268,9 +266,8 @@ describe('CartManager', () => {
             { productId: 6, quantity: 1 },
           ])
           .build()
-        const cartManager = buildCartManager(user)
 
-        const actual = cartManager.getFinalSummary()
+        const actual = buildCartManager(user).getFinalSummary()
 
         expect(actual).toEqual({
           total: 550,
