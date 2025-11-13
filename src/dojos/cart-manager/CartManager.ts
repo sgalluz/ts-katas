@@ -53,13 +53,13 @@ export class CartManager {
 
     const totalAfterDiscount = subtotal - discount
 
-    const shippingCost = this.shippingCalculator.calculateShipping(
-      totalAfterDiscount,
-      this.cartItems.totalWeight,
-      shippingAddress,
-      this.userProfile,
+    const shippingCost = this.shippingCalculator.calculateShipping({
+      totalPrice: totalAfterDiscount,
+      totalWeight: this.cartItems.totalWeight,
+      address: shippingAddress,
+      userProfile: this.userProfile,
       couponCode
-    )
+    })
 
     const finalTotal = totalAfterDiscount + shippingCost
     return { total: subtotal, discount, shippingCost, finalTotal }
