@@ -3,9 +3,8 @@ import { ILogger } from './services/Logger'
 import { IDiscountCalculator } from './services/DiscountCalculator'
 import { IShippingCalculator } from './services/ShippingCalculator'
 import { INotifier } from './services/Notifier'
-import { CartItem } from './models/CartItem'
+import { CartItems } from './models/CartItems'
 import { ProductRepository } from './repositories/ProductRepository'
-import { Product } from './models/Product'
 
 
 // The God Class
@@ -15,7 +14,7 @@ export class CartManager {
 
   constructor(
         private readonly userProfile: UserProfile, // Still depends on an entire profile, just implementing DI via constructor
-        private items: CartItem[],
+        private readonly cartItems: CartItems,
         private readonly productRepository: ProductRepository,
         private readonly discountCalculator: IDiscountCalculator,
         private readonly shippingCalculator: IShippingCalculator,
@@ -36,17 +35,17 @@ export class CartManager {
   ): { success: boolean, message: string } {
     const product = this.productRepository.getProductById(productId)
 
-    const existingItem = this.items.find(item => item.product.id === productId)
+    const existingItem = this.cartItems.findByProductId(productId)
 
     if (quantity <= 0) {
-      if (existingItem) this.removeItem(productId)
+      if (existingItem) this.cartItems.remove(productId)
       return { success: true, message: 'Item removed or zero quantity ignored.' }
     }
 
     if (existingItem) {
-      this.updateItemQuantity(productId, quantity)
+      this.cartItems.updateQuantity(productId, quantity)
     } else {
-      this.addItem(product, quantity)
+      this.cartItems.add(product, quantity)
     }
 
     // 2. Lifestyle Updates (Implicit side effects)
@@ -65,7 +64,7 @@ export class CartManager {
      * Huge method that calculates everything (Responsibilities 3, 4, 5, 7, 8)
      */
   public getFinalSummary(): { total: number, discount: number, shippingCost: number, finalTotal: number } {
-    const { totalPrice: subtotal, totalWeight } = this.getTotalPriceAndWeight()
+    const subtotal = this.cartItems.getTotalPrice()
 
     const discount = this.discountCalculator.calculateDiscount(subtotal, this.userProfile, this.appliedCouponCode)
 
@@ -73,7 +72,7 @@ export class CartManager {
 
     const shippingCost = this.shippingCalculator.calculateShipping(
       totalAfterDiscount,
-      totalWeight,
+      this.cartItems.getTotalWeight(),
       this.shippingAddress,
       this.userProfile,
       this.appliedCouponCode
@@ -81,7 +80,7 @@ export class CartManager {
 
     const finalTotal = totalAfterDiscount + shippingCost
 
-    if (finalTotal > 500 && this.items.length > 5) {
+    if (finalTotal > 500 && this.cartItems.length > 5) {
       this.notifier.sendHighValueOrderAlert(this.userProfile.id, finalTotal)
     }
 
@@ -91,28 +90,5 @@ export class CartManager {
       shippingCost: shippingCost,
       finalTotal: finalTotal
     }
-  }
-
-  private getTotalPriceAndWeight(): { totalPrice: number, totalWeight: number } {
-    return this.items.reduce(
-      (acc, { product, quantity }) => {
-        acc.totalPrice += product.price * quantity
-        acc.totalWeight += product.weightKg * quantity
-        return acc
-      },
-      { totalPrice: 0, totalWeight: 0 }
-    )
-  }
-
-  private removeItem(productId: number): void {
-    this.items = this.items.filter(item => item.product.id !== productId)
-  }
-
-  private updateItemQuantity(productId: number, quantity: number): void {
-    this.items = this.items.map(item => item.product.id === productId ? { ...item, quantity } : item)
-  }
-
-  private addItem(product: Product, quantity: number): void {
-    this.items.push({ product, quantity })
   }
 }
