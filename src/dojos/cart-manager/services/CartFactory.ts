@@ -32,7 +32,7 @@ export class CartFactory {
 
     return new CartManager(
       userProfile,
-      initialItems, // CartItemsLoader is bing replaced by pre-loaded items
+      initialItems,
       this.discountCalculator,
       this.shippingCalculator,
       this.notifier,

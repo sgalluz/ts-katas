@@ -12,10 +12,6 @@ export class CartManager {
   private shippingAddress = ''
   private appliedCouponCode: string | null = null
 
-  /**
-     * Constructor with initialization logic that loads data
-     * and has side effects (logging).
-     */
   constructor(
         private readonly userProfile: UserProfile, // Still depends on an entire profile, just implementing DI via constructor
         private items: CartItem[],

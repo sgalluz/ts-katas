@@ -7,51 +7,7 @@ import { DiscountCalculator } from './services/DiscountCalculator'
 import { ShippingCalculator } from './services/ShippingCalculator'
 import { Notifier } from './services/Notifier'
 import { Product } from './models/Product'
-
-class UserProfileBuilder {
-  private profile: UserProfile = { id: 1, type: UserType.Standard, isFirstPurchase: false, savedCartItems: [] }
-
-  withId(id: number): this {
-    this.profile.id = id
-    return this
-  }
-
-  asGuest(): this {
-    this.profile.type = UserType.Guest
-    return this
-  }
-
-  asStandard(): this {
-    this.profile.type = UserType.Standard
-    return this
-  }
-
-  asPremium(): this {
-    this.profile.type = UserType.Premium
-    return this
-  }
-
-  asFirstPurchase(): this {
-    this.profile.isFirstPurchase = true
-    return this
-  }
-
-  withSavedItem(productId: number, quantity: number): this {
-    this.profile.savedCartItems.push({ productId, quantity })
-    return this
-  }
-
-  withSavedItems(items: { productId: number, quantity: number }[]): this {
-    this.profile.savedCartItems = items
-    return this
-  }
-
-  build(): UserProfile {
-    return { ...this.profile }
-  }
-}
-
-const aUser = () => new UserProfileBuilder()
+import { aUser } from './utils/UserProfileBuilder'
 
 const mockDiscountService: jest.Mocked<IDiscountService> = { validateCoupon: jest.fn() }
 const mockShippingService: jest.Mocked<IShippingService> = { calculate: jest.fn() }
