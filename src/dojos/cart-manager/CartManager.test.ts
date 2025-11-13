@@ -5,6 +5,7 @@ import { IShippingService } from './services/ShippingService'
 import { Logger } from './services/Logger'
 import { DiscountCalculator } from './services/DiscountCalculator'
 import { ShippingCalculator } from './services/ShippingCalculator'
+import { CartValidator } from './services/CartValidator'
 import { Notifier } from './services/Notifier'
 import { Product } from './models/Product'
 import { aUser } from './utils/UserProfileBuilder'
@@ -19,13 +20,14 @@ const mockProductRepository: jest.Mocked<ProductRepository> = { getProductById: 
 const buildCartManager = (user: UserProfile) => {
   const discountCalculator = new DiscountCalculator(mockDiscountService)
   const shippingCalculator = new ShippingCalculator(mockShippingService)
+  const cartValidator = new CartValidator()
   const notifier = new Notifier(mockLogger)
 
   const items = user.savedCartItems.map(({ productId, quantity }) => ({
     product: buildProduct(productId), quantity
   }))
 
-  return new CartManager(user, new CartItems(items), mockProductRepository, discountCalculator, shippingCalculator, notifier, mockLogger)
+  return new CartManager(user, new CartItems(items), mockProductRepository, discountCalculator, shippingCalculator, cartValidator, notifier, mockLogger)
 }
 
 const buildProduct = (id: number): Product => ({
