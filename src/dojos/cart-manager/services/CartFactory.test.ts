@@ -1,57 +1,10 @@
 import { Logger } from './Logger'
 import { ProductRepository } from '../repositories/ProductRepository'
-import { UserProfile, UserType } from '../models/UserProfile'
 import { IDiscountCalculator } from './DiscountCalculator'
 import { Notifier } from './Notifier'
 import { CartFactory } from './CartFactory'
 import { IShippingCalculator } from './ShippingCalculator'
-
-// FIXME: builder temporary duplicated
-class UserProfileBuilder {
-  private profile: UserProfile = { id: 1, type: UserType.Standard, isFirstPurchase: false, savedCartItems: [] }
-
-  withId(id: number): this {
-    this.profile.id = id
-    return this
-  }
-
-  asGuest(): this {
-    this.profile.type = UserType.Guest
-    return this
-  }
-
-  asStandard(): this {
-    this.profile.type = UserType.Standard
-    return this
-  }
-
-  asPremium(): this {
-    this.profile.type = UserType.Premium
-    return this
-  }
-
-  asFirstPurchase(): this {
-    this.profile.isFirstPurchase = true
-    return this
-  }
-
-  withSavedItem(productId: number, quantity: number): this {
-    this.profile.savedCartItems.push({ productId, quantity })
-    return this
-  }
-
-  withSavedItems(items: { productId: number, quantity: number }[]): this {
-    this.profile.savedCartItems = items
-    return this
-  }
-
-  build(): UserProfile {
-    return { ...this.profile }
-  }
-}
-
-const aUser = () => new UserProfileBuilder()
-
+import { aUser } from '../utils/UserProfileBuilder'
 
 const mockDiscountCalculator: jest.Mocked<IDiscountCalculator> = { calculateDiscount: jest.fn() }
 const mockShippingCalculator: jest.Mocked<IShippingCalculator> = { calculateShipping: jest.fn() }
