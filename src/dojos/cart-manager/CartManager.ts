@@ -5,6 +5,7 @@ import { IShippingCalculator } from './services/ShippingCalculator'
 import { INotifier } from './services/Notifier'
 import { CartItem } from './models/CartItem'
 import { ProductRepository } from './repositories/ProductRepository'
+import { Product } from './models/Product'
 
 
 // The God Class
@@ -38,16 +39,14 @@ export class CartManager {
     const existingItem = this.items.find(item => item.product.id === productId)
 
     if (quantity <= 0) {
-      if (existingItem) {
-        this.items = this.items.filter(item => item.product.id !== productId)
-      }
+      if (existingItem) this.removeItem(productId)
       return { success: true, message: 'Item removed or zero quantity ignored.' }
     }
 
     if (existingItem) {
-      existingItem.quantity = quantity
+      this.updateItemQuantity(productId, quantity)
     } else {
-      this.items.push({ product, quantity })
+      this.addItem(product, quantity)
     }
 
     // 2. Lifestyle Updates (Implicit side effects)
@@ -103,5 +102,17 @@ export class CartManager {
       },
       { totalPrice: 0, totalWeight: 0 }
     )
+  }
+
+  private removeItem(productId: number): void {
+    this.items = this.items.filter(item => item.product.id !== productId)
+  }
+
+  private updateItemQuantity(productId: number, quantity: number): void {
+    this.items = this.items.map(item => item.product.id === productId ? { ...item, quantity } : item)
+  }
+
+  private addItem(product: Product, quantity: number): void {
+    this.items.push({ product, quantity })
   }
 }
