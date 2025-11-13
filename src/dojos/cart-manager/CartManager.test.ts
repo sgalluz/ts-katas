@@ -153,9 +153,9 @@ describe('CartManager', () => {
       const user = aUser()
         .withId(5)
         .asFirstPurchase()
+        .withSavedItem(2, 1)
         .build()
       const cartManager = buildCartManager(user)
-      cartManager.updateCart(2, 1)
 
       const actual = cartManager.getFinalSummary()
 
@@ -174,11 +174,11 @@ describe('CartManager', () => {
       const user = aUser()
         .withId(7)
         .asFirstPurchase()
+        .withSavedItem(2, 1)
         .build()
       user.type = type // Override type dopo build
 
       const cartManager = buildCartManager(user)
-      cartManager.updateCart(2, 1)
 
       const actual = cartManager.getFinalSummary()
       expect(actual).toEqual({
@@ -203,9 +203,9 @@ describe('CartManager', () => {
         const user = aUser()
           .withId(10)
           .asPremium()
+          .withSavedItem(4, 1)
           .build()
         const cartManager = buildCartManager(user)
-        cartManager.updateCart(4, 1)
 
         const actual = cartManager.getFinalSummary({ couponCode: 'TS_DOJO_20' })
 
@@ -221,9 +221,9 @@ describe('CartManager', () => {
       it('should calulate wieght-based shipping cost correctly', () => {
         const user = aUser()
           .withId(11)
+          .withSavedItem(4, 1)
           .build()
         const cartManager = buildCartManager(user)
-        cartManager.updateCart(4, 1)
 
         const actual = cartManager.getFinalSummary({ shippingAddress: '123 Main St, Island City' })
 
@@ -242,9 +242,9 @@ describe('CartManager', () => {
         const user = aUser()
           .withId(11)
           .asGuest()
+          .withSavedItem(5, 5)
           .build()
         const cartManager = buildCartManager(user)
-        cartManager.updateCart(5, 5)
 
         const actual = cartManager.getFinalSummary()
 
@@ -265,10 +265,10 @@ describe('CartManager', () => {
             { productId: 3, quantity: 4 },
             { productId: 4, quantity: 3 },
             { productId: 5, quantity: 1 },
+            { productId: 6, quantity: 1 },
           ])
           .build()
         const cartManager = buildCartManager(user)
-        cartManager.updateCart(6, 1)
 
         const actual = cartManager.getFinalSummary()
 
