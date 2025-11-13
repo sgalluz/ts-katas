@@ -6,6 +6,7 @@ import { INotifier } from './services/Notifier'
 import { ICartValidator } from './services/CartValidator'
 import { CartItems } from './models/CartItems'
 import { ProductRepository } from './repositories/ProductRepository'
+import { CartSummary } from './models/CartSummary'
 
 
 // The God Class
@@ -54,7 +55,7 @@ export class CartManager {
   /**
      * Huge method that calculates everything (Responsibilities 3, 4, 5, 7, 8)
      */
-  public getFinalSummary(): { total: number, discount: number, shippingCost: number, finalTotal: number } {
+  public getFinalSummary(): CartSummary {
     const subtotal = this.cartItems.totalPrice
 
     const discount = this.discountCalculator.calculateDiscount(subtotal, this.userProfile, this.appliedCouponCode)
