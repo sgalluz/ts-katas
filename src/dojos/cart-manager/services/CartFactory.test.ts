@@ -116,13 +116,9 @@ describe('CartFactory', () => {
 
       expect(mockLogger.log).toHaveBeenCalledWith('Loading 2 saved items for user 100')
       expect(mockLogger.log).toHaveBeenCalledWith('[LOGGING] Cart initialized for user: 100.')
-      expect(mockProductRepository.getProductById).toHaveBeenCalledTimes(4)
+      expect(mockProductRepository.getProductById).toHaveBeenCalledTimes(2)
       expect(mockProductRepository.getProductById).toHaveBeenCalledWith(1)
       expect(mockProductRepository.getProductById).toHaveBeenCalledWith(2)
-      // will become valid when the CartManager constructor will be cleaned
-      // expect(mockProductRepository.getProductById).toHaveBeenCalledTimes(2)
-      // expect(mockProductRepository.getProductById).toHaveBeenCalledWith(1)
-      // expect(mockProductRepository.getProductById).toHaveBeenCalledWith(2)
     })
   })
 

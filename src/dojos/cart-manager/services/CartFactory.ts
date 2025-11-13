@@ -6,7 +6,6 @@ import { ProductRepository } from '../repositories/ProductRepository'
 import { UserProfile } from '../models/UserProfile'
 import { CartManager } from '../CartManager'
 import { CartItem } from '../models/CartItem'
-import { CartItemsLoader } from './CartItemsLoader'
 
 export class CartFactory {
   constructor(
@@ -19,8 +18,11 @@ export class CartFactory {
   }
 
   public createCartForUser(userProfile: UserProfile): CartManager {
+    const { savedCartItems, id } = userProfile
+    if (savedCartItems.length) this.logger.log(`Loading ${savedCartItems.length} saved items for user ${id}`)
+
     const initialItems: CartItem[] =
-            userProfile.savedCartItems.flatMap(({ productId, quantity }) => {
+            savedCartItems.flatMap(({ productId, quantity }) => {
               const product = this.productRepository.getProductById(productId)
               if (product) return [{ product, quantity }]
 
@@ -30,7 +32,6 @@ export class CartFactory {
 
     return new CartManager(
       userProfile,
-      new CartItemsLoader(this.productRepository), // CartItemsLoader is bing replaced by pre-loaded items
       initialItems, // CartItemsLoader is bing replaced by pre-loaded items
       this.discountCalculator,
       this.shippingCalculator,
