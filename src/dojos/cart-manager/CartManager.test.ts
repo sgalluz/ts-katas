@@ -64,7 +64,7 @@ const buildCartManager = (user: UserProfile) => {
   const discountCalculator = new DiscountCalculator(mockDiscountService)
   const shippingCalculator = new ShippingCalculator(mockShippingService)
   const notifier = new Notifier(mockLogger)
-  return new CartManager(user, cartItemLoader, discountCalculator, shippingCalculator, notifier, mockLogger)
+  return new CartManager(user, cartItemLoader, [], discountCalculator, shippingCalculator, notifier, mockLogger)
 }
 
 describe('CartManager', () => {

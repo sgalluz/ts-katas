@@ -1,10 +1,11 @@
 import { Product } from './models/Product'
 import { UserProfile } from './models/UserProfile'
 import { ILogger } from './services/Logger'
-import { DiscountCalculator } from './services/DiscountCalculator'
-import { ShippingCalculator } from './services/ShippingCalculator'
+import { IDiscountCalculator } from './services/DiscountCalculator'
+import { IShippingCalculator } from './services/ShippingCalculator'
 import { INotifier } from './services/Notifier'
 import { ICartItemsLoader } from './services/CartItemsLoader'
+import { CartItem } from './models/CartItem'
 
 
 // The God Class
@@ -20,8 +21,9 @@ export class CartManager {
   constructor(
         private readonly userProfile: UserProfile, // Still depends on an entire profile, just implementing DI via constructor
         private readonly cartItemsLoader: ICartItemsLoader,
-        private readonly discountCalculator: DiscountCalculator,
-        private readonly shippingCalculator: ShippingCalculator,
+        private readonly initialItems: CartItem[],
+        private readonly discountCalculator: IDiscountCalculator,
+        private readonly shippingCalculator: IShippingCalculator,
         private readonly notifier: INotifier,
         private readonly logger: ILogger
   ) {
