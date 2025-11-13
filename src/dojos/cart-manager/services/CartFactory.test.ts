@@ -4,6 +4,7 @@ import { IDiscountCalculator } from './DiscountCalculator'
 import { Notifier } from './Notifier'
 import { CartFactory } from './CartFactory'
 import { IShippingCalculator } from './ShippingCalculator'
+import { CartValidator } from './CartValidator'
 import { aUser } from '../utils/UserProfileBuilder'
 
 const mockDiscountCalculator: jest.Mocked<IDiscountCalculator> = { calculateDiscount: jest.fn() }
@@ -15,6 +16,7 @@ const buildCartFactory = (): CartFactory => new CartFactory(
   mockProductRepository,
   mockDiscountCalculator,
   mockShippingCalculator,
+  new CartValidator(),
   new Notifier(mockLogger),
   mockLogger
 )

@@ -3,6 +3,7 @@ import { ILogger } from './services/Logger'
 import { IDiscountCalculator } from './services/DiscountCalculator'
 import { IShippingCalculator } from './services/ShippingCalculator'
 import { INotifier } from './services/Notifier'
+import { ICartValidator } from './services/CartValidator'
 import { CartItems } from './models/CartItems'
 import { ProductRepository } from './repositories/ProductRepository'
 
@@ -18,6 +19,7 @@ export class CartManager {
         private readonly productRepository: ProductRepository,
         private readonly discountCalculator: IDiscountCalculator,
         private readonly shippingCalculator: IShippingCalculator,
+        private readonly cartValidator: ICartValidator,
         private readonly notifier: INotifier,
         private readonly logger: ILogger
   ) {
@@ -35,10 +37,8 @@ export class CartManager {
   ): { success: boolean, message: string } {
     const product = this.productRepository.getProductById(productId)
 
-    // 3. Logic Control (Responsibility 2: Validation)
-    if (this.userProfile.id === 999 && product.price > 100) { // Uses this.userProfile.id
-      return { success: false, message: 'VIP user 999 cannot purchase expensive items directly.' }
-    }
+    const { valid, reason } = this.cartValidator.canAddProduct(this.userProfile, product)
+    if (!valid) return { success: false, message: reason ?? 'Cannot add product' }
 
     this.cartItems.setQuantity(product, quantity)
 
@@ -71,7 +71,7 @@ export class CartManager {
 
     const finalTotal = totalAfterDiscount + shippingCost
 
-    if (finalTotal > 500 && this.cartItems.length > 5) {
+    if (this.cartValidator.isHighValueOrder(finalTotal, this.cartItems.length)) {
       this.notifier.sendHighValueOrderAlert(this.userProfile.id, finalTotal)
     }
 

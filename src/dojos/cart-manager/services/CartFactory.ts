@@ -1,5 +1,6 @@
 import { IDiscountCalculator } from './DiscountCalculator'
 import { IShippingCalculator } from './ShippingCalculator'
+import { ICartValidator } from './CartValidator'
 import { INotifier } from './Notifier'
 import { ILogger } from './Logger'
 import { ProductRepository } from '../repositories/ProductRepository'
@@ -13,6 +14,7 @@ export class CartFactory {
         private readonly productRepository: ProductRepository,
         private readonly discountCalculator: IDiscountCalculator,
         private readonly shippingCalculator: IShippingCalculator,
+        private readonly cartValidator: ICartValidator,
         private readonly notifier: INotifier,
         private readonly logger: ILogger
   ) {
@@ -37,6 +39,7 @@ export class CartFactory {
       this.productRepository,
       this.discountCalculator,
       this.shippingCalculator,
+      this.cartValidator,
       this.notifier,
       this.logger
     )
