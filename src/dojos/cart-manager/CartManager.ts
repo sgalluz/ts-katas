@@ -35,36 +35,27 @@ export class CartManager {
   ): { success: boolean, message: string } {
     const product = this.productRepository.getProductById(productId)
 
-    const existingItem = this.cartItems.findByProductId(productId)
-
-    if (quantity <= 0) {
-      if (existingItem) this.cartItems.remove(productId)
-      return { success: true, message: 'Item removed or zero quantity ignored.' }
-    }
-
-    if (existingItem) {
-      this.cartItems.updateQuantity(productId, quantity)
-    } else {
-      this.cartItems.add(product, quantity)
-    }
-
-    // 2. Lifestyle Updates (Implicit side effects)
-    this.appliedCouponCode = couponCode
-    this.shippingAddress = address
-
     // 3. Logic Control (Responsibility 2: Validation)
     if (this.userProfile.id === 999 && product.price > 100) { // Uses this.userProfile.id
       return { success: false, message: 'VIP user 999 cannot purchase expensive items directly.' }
     }
 
-    return { success: true, message: 'Cart updated successfully.' }
+    this.cartItems.setQuantity(product, quantity)
+
+    // 2. Lifestyle Updates (Implicit side effects)
+    this.appliedCouponCode = couponCode
+    this.shippingAddress = address
+
+    const message = quantity <= 0 ? 'Item removed or zero quantity ignored.' : 'Cart updated successfully.'
+
+    return { success: true, message }
   }
 
   /**
      * Huge method that calculates everything (Responsibilities 3, 4, 5, 7, 8)
      */
   public getFinalSummary(): { total: number, discount: number, shippingCost: number, finalTotal: number } {
-    const subtotal = this.cartItems.getTotalPrice()
+    const subtotal = this.cartItems.totalPrice
 
     const discount = this.discountCalculator.calculateDiscount(subtotal, this.userProfile, this.appliedCouponCode)
 
@@ -72,7 +63,7 @@ export class CartManager {
 
     const shippingCost = this.shippingCalculator.calculateShipping(
       totalAfterDiscount,
-      this.cartItems.getTotalWeight(),
+      this.cartItems.totalWeight,
       this.shippingAddress,
       this.userProfile,
       this.appliedCouponCode
