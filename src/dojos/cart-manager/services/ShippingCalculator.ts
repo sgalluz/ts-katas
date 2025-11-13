@@ -8,11 +8,15 @@ export interface IShippingCalculator {
 export class ShippingCalculator {
   private static readonly BASE_SHIPPING_FEE = 15
   private static readonly EXTRA_FEE = 10
+  private static readonly SHIPPING_FEE_THRESHOLD = 200
+  private static readonly BASE_SHIPPING_FEE_AMOUNT_THRESHOLD = 100
+
 
   constructor(private readonly shippingService: IShippingService) {
   }
 
   // FIXME: this should be imprpoved as five parameters for a method is too many...
+
   public calculateShipping(
     totalAfterDiscount: number,
     totalWeight: number,
@@ -22,7 +26,8 @@ export class ShippingCalculator {
   ): number {
     const shippingCost = this.getBaseShippingCost(totalAfterDiscount, address, totalWeight, couponCode)
 
-    const shouldApplyExtraFee = profile.type === UserType.Guest && totalAfterDiscount + shippingCost > 200
+    const shouldApplyExtraFee = profile.type === UserType.Guest
+            && totalAfterDiscount + shippingCost > ShippingCalculator.SHIPPING_FEE_THRESHOLD
     const extraFee = shouldApplyExtraFee ? ShippingCalculator.EXTRA_FEE : 0
 
     return shippingCost + extraFee
@@ -33,6 +38,8 @@ export class ShippingCalculator {
       return this.shippingService.calculate(address, totalWeight)
     }
 
-    return couponCode === 'FREE_SHIPPING' || totalAfterDiscount >= 100 ? 0 : ShippingCalculator.BASE_SHIPPING_FEE
+    return couponCode === 'FREE_SHIPPING' || totalAfterDiscount >= ShippingCalculator.BASE_SHIPPING_FEE_AMOUNT_THRESHOLD
+      ? 0
+      : ShippingCalculator.BASE_SHIPPING_FEE
   }
 }
