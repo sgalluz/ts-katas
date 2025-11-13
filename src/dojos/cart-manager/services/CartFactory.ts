@@ -6,6 +6,7 @@ import { ProductRepository } from '../repositories/ProductRepository'
 import { UserProfile } from '../models/UserProfile'
 import { CartManager } from '../CartManager'
 import { CartItem } from '../models/CartItem'
+import { CartItems } from '../models/CartItems'
 
 export class CartFactory {
   constructor(
@@ -32,7 +33,7 @@ export class CartFactory {
 
     return new CartManager(
       userProfile,
-      initialItems,
+      new CartItems(initialItems),
       this.productRepository,
       this.discountCalculator,
       this.shippingCalculator,
