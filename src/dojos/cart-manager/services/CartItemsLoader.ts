@@ -1,5 +1,5 @@
 import { Product } from '../models/Product'
-import { ProductRepository } from './ProductRepository'
+import { ProductRepository } from '../repositories/ProductRepository'
 
 export interface ICartItemsLoader {
     loadItems(savedItems: { productId: number, quantity: number }[]): { product: Product, quantity: number }[]

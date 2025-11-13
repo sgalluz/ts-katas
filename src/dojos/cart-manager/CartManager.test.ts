@@ -7,7 +7,7 @@ import { DiscountCalculator } from './services/DiscountCalculator'
 import { ShippingCalculator } from './services/ShippingCalculator'
 import { Notifier } from './services/Notifier'
 import { CartItemsLoader } from './services/CartItemsLoader'
-import { ProductRepository } from './services/ProductRepository'
+import { ProductRepository } from './repositories/ProductRepository'
 
 class UserProfileBuilder {
   private profile: UserProfile = { id: 1, type: UserType.Standard, isFirstPurchase: false, savedCartItems: [] }
