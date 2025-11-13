@@ -1,10 +1,10 @@
-import { Product } from './models/Product'
 import { UserProfile } from './models/UserProfile'
 import { ILogger } from './services/Logger'
 import { IDiscountCalculator } from './services/DiscountCalculator'
 import { IShippingCalculator } from './services/ShippingCalculator'
 import { INotifier } from './services/Notifier'
 import { CartItem } from './models/CartItem'
+import { ProductRepository } from './repositories/ProductRepository'
 
 
 // The God Class
@@ -15,6 +15,7 @@ export class CartManager {
   constructor(
         private readonly userProfile: UserProfile, // Still depends on an entire profile, just implementing DI via constructor
         private items: CartItem[],
+        private readonly productRepository: ProductRepository,
         private readonly discountCalculator: IDiscountCalculator,
         private readonly shippingCalculator: IShippingCalculator,
         private readonly notifier: INotifier,
@@ -32,10 +33,8 @@ export class CartManager {
     couponCode: string | null = null,
     address = ''
   ): { success: boolean, message: string } {
+    const product = this.productRepository.getProductById(productId)
 
-    // 1. Cart Management (Responsibility 1)
-    // Simulates product retrieval
-    const product: Product = { id: productId, name: `Product ${productId}`, price: productId * 10, weightKg: 1 }
     const existingItem = this.items.find(item => item.product.id === productId)
 
     if (quantity <= 0) {
@@ -67,7 +66,7 @@ export class CartManager {
      * Huge method that calculates everything (Responsibilities 3, 4, 5, 7, 8)
      */
   public getFinalSummary(): { total: number, discount: number, shippingCost: number, finalTotal: number } {
-    const subtotal = this.getSubtotal()
+    const { totalPrice: subtotal, totalWeight } = this.getTotalPriceAndWeight()
 
     const discount = this.discountCalculator.calculateDiscount(subtotal, this.userProfile, this.appliedCouponCode)
 
@@ -75,7 +74,7 @@ export class CartManager {
 
     const shippingCost = this.shippingCalculator.calculateShipping(
       totalAfterDiscount,
-      this.getTotalWeight(),
+      totalWeight,
       this.shippingAddress,
       this.userProfile,
       this.appliedCouponCode
@@ -95,17 +94,14 @@ export class CartManager {
     }
   }
 
-  private getTotalWeight(): number {
+  private getTotalPriceAndWeight(): { totalPrice: number, totalWeight: number } {
     return this.items.reduce(
-      (acc, { product, quantity }) => acc + product.weightKg * quantity,
-      0
-    )
-  }
-
-  private getSubtotal(): number {
-    return this.items.reduce(
-      (acc, { product, quantity }) => acc + product.price * quantity,
-      0
+      (acc, { product, quantity }) => {
+        acc.totalPrice += product.price * quantity
+        acc.totalWeight += product.weightKg * quantity
+        return acc
+      },
+      { totalPrice: 0, totalWeight: 0 }
     )
   }
 }
