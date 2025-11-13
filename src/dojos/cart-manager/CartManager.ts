@@ -36,10 +36,17 @@ export class CartManager {
     return { success: true, message }
   }
 
-  /**
-     * Huge method that calculates everything (Responsibilities 3, 4, 5, 7, 8)
-     */
   public getFinalSummary({ couponCode = null, shippingAddress = '' }: CheckoutOptions = {}): CartSummary {
+    const summary = this.generateSummary(couponCode, shippingAddress)
+
+    if (this.cartValidator.isHighValueOrder(summary.finalTotal, this.cartItems.length)) {
+      this.notifier.sendHighValueOrderAlert(this.userProfile.id, summary.finalTotal)
+    }
+
+    return summary
+  }
+
+  private generateSummary(couponCode: string | null, shippingAddress: string) {
     const subtotal = this.cartItems.totalPrice
 
     const discount = this.discountCalculator.calculateDiscount(subtotal, this.userProfile, couponCode)
@@ -55,16 +62,6 @@ export class CartManager {
     )
 
     const finalTotal = totalAfterDiscount + shippingCost
-
-    if (this.cartValidator.isHighValueOrder(finalTotal, this.cartItems.length)) {
-      this.notifier.sendHighValueOrderAlert(this.userProfile.id, finalTotal)
-    }
-
-    return {
-      total: subtotal,
-      discount: discount,
-      shippingCost: shippingCost,
-      finalTotal: finalTotal
-    }
+    return { total: subtotal, discount, shippingCost, finalTotal }
   }
 }
