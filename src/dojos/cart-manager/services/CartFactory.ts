@@ -33,6 +33,7 @@ export class CartFactory {
     return new CartManager(
       userProfile,
       initialItems,
+      this.productRepository,
       this.discountCalculator,
       this.shippingCalculator,
       this.notifier,

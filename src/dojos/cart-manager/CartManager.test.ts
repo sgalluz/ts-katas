@@ -8,10 +8,12 @@ import { ShippingCalculator } from './services/ShippingCalculator'
 import { Notifier } from './services/Notifier'
 import { Product } from './models/Product'
 import { aUser } from './utils/UserProfileBuilder'
+import { ProductRepository } from './repositories/ProductRepository'
 
 const mockDiscountService: jest.Mocked<IDiscountService> = { validateCoupon: jest.fn() }
 const mockShippingService: jest.Mocked<IShippingService> = { calculate: jest.fn() }
 const mockLogger: jest.Mocked<Logger> = { log: jest.fn(), warn: jest.fn() }
+const mockProductRepository: jest.Mocked<ProductRepository> = { getProductById: jest.fn() }
 
 const buildCartManager = (user: UserProfile) => {
   const discountCalculator = new DiscountCalculator(mockDiscountService)
@@ -22,7 +24,7 @@ const buildCartManager = (user: UserProfile) => {
     product: buildProduct(productId), quantity
   }))
 
-  return new CartManager(user, items, discountCalculator, shippingCalculator, notifier, mockLogger)
+  return new CartManager(user, items, mockProductRepository, discountCalculator, shippingCalculator, notifier, mockLogger)
 }
 
 const buildProduct = (id: number): Product => ({
@@ -30,6 +32,8 @@ const buildProduct = (id: number): Product => ({
 })
 
 describe('CartManager', () => {
+  beforeEach(() => mockProductRepository.getProductById.mockImplementation(buildProduct))
+
   afterEach(() => jest.clearAllMocks())
 
   describe('when invoking the constructor', () => {

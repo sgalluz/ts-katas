@@ -74,5 +74,4 @@ describe('CartFactory', () => {
       expect(mockProductRepository.getProductById).toHaveBeenCalledWith(2)
     })
   })
-
 })
