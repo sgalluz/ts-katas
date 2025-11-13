@@ -205,9 +205,9 @@ describe('CartManager', () => {
           .asPremium()
           .build()
         const cartManager = buildCartManager(user)
-        cartManager.updateCart(4, 1, 'TS_DOJO_20')
+        cartManager.updateCart(4, 1)
 
-        const actual = cartManager.getFinalSummary()
+        const actual = cartManager.getFinalSummary({ couponCode: 'TS_DOJO_20' })
 
         expect(actual).toEqual({
           total: 40,
@@ -223,9 +223,9 @@ describe('CartManager', () => {
           .withId(11)
           .build()
         const cartManager = buildCartManager(user)
-        cartManager.updateCart(4, 1, undefined, '123 Main St, Island City')
+        cartManager.updateCart(4, 1)
 
-        const actual = cartManager.getFinalSummary()
+        const actual = cartManager.getFinalSummary({ shippingAddress: '123 Main St, Island City' })
 
         expect(actual).toEqual({
           total: 40,

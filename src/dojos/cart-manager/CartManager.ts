@@ -7,13 +7,9 @@ import { ICartValidator } from './services/CartValidator'
 import { CartItems } from './models/CartItems'
 import { ProductRepository } from './repositories/ProductRepository'
 import { CartSummary } from './models/CartSummary'
+import { CheckoutOptions } from './models/CheckoutOptions'
 
-
-// The God Class
 export class CartManager {
-  private shippingAddress = ''
-  private appliedCouponCode: string | null = null
-
   constructor(
         private readonly userProfile: UserProfile, // Still depends on an entire profile, just implementing DI via constructor
         private readonly cartItems: CartItems,
@@ -27,25 +23,13 @@ export class CartManager {
     this.logger.log(`[LOGGING] Cart initialized for user: ${this.userProfile.id}.`)
   }
 
-  /**
-     * Huge method that does too many things (CRUD + Business Logic)
-     */
-  public updateCart(
-    productId: number,
-    quantity: number,
-    couponCode: string | null = null,
-    address = ''
-  ): { success: boolean, message: string } {
+  public updateCart(productId: number, quantity: number): { success: boolean, message: string } {
     const product = this.productRepository.getProductById(productId)
 
     const { valid, reason } = this.cartValidator.canAddProduct(this.userProfile, product)
     if (!valid) return { success: false, message: reason ?? 'Cannot add product' }
 
     this.cartItems.setQuantity(product, quantity)
-
-    // 2. Lifestyle Updates (Implicit side effects)
-    this.appliedCouponCode = couponCode
-    this.shippingAddress = address
 
     const message = quantity <= 0 ? 'Item removed or zero quantity ignored.' : 'Cart updated successfully.'
 
@@ -55,19 +39,19 @@ export class CartManager {
   /**
      * Huge method that calculates everything (Responsibilities 3, 4, 5, 7, 8)
      */
-  public getFinalSummary(): CartSummary {
+  public getFinalSummary({ couponCode = null, shippingAddress = '' }: CheckoutOptions = {}): CartSummary {
     const subtotal = this.cartItems.totalPrice
 
-    const discount = this.discountCalculator.calculateDiscount(subtotal, this.userProfile, this.appliedCouponCode)
+    const discount = this.discountCalculator.calculateDiscount(subtotal, this.userProfile, couponCode)
 
     const totalAfterDiscount = subtotal - discount
 
     const shippingCost = this.shippingCalculator.calculateShipping(
       totalAfterDiscount,
       this.cartItems.totalWeight,
-      this.shippingAddress,
+      shippingAddress,
       this.userProfile,
-      this.appliedCouponCode
+      couponCode
     )
 
     const finalTotal = totalAfterDiscount + shippingCost
