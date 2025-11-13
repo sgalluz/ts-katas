@@ -1,7 +1,11 @@
 import { IDiscountService } from './DiscountService'
 import { UserProfile, UserType } from '../models/UserProfile'
 
-export class DiscountCalculator {
+export interface IDiscountCalculator {
+    calculateDiscount(subtotal: number, profile: UserProfile, couponCode: string | null): number
+}
+
+export class DiscountCalculator implements IDiscountCalculator {
   private static readonly FIRST_PURCHASE_DISCOUNT_PCT = 0.10
 
   constructor(private readonly discountService: IDiscountService) {

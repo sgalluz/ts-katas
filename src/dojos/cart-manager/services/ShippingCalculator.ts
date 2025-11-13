@@ -1,6 +1,10 @@
 import { IShippingService } from './ShippingService'
 import { UserProfile, UserType } from '../models/UserProfile'
 
+export interface IShippingCalculator {
+    calculateShipping(totalAfterDiscount: number, totalWeight: number, address: string, profile: UserProfile, couponCode: string | null): number
+}
+
 export class ShippingCalculator {
   private static readonly BASE_SHIPPING_FEE = 15
   private static readonly EXTRA_FEE = 10
