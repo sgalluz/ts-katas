@@ -1,21 +1,18 @@
 import { Logger } from './Logger'
 import { ProductRepository } from '../repositories/ProductRepository'
-import { IDiscountCalculator } from './DiscountCalculator'
 import { Notifier } from './Notifier'
 import { CartFactory } from './CartFactory'
-import { IShippingCalculator } from './ShippingCalculator'
 import { CartValidator } from './CartValidator'
 import { aUser } from '../utils/UserProfileBuilder'
+import { ICartSummaryService } from './CartSummaryService'
 
-const mockDiscountCalculator: jest.Mocked<IDiscountCalculator> = { calculateDiscount: jest.fn() }
-const mockShippingCalculator: jest.Mocked<IShippingCalculator> = { calculateShipping: jest.fn() }
+const mockCartSummaryService: jest.Mocked<ICartSummaryService> = { generateSummary: jest.fn() }
 const mockLogger: jest.Mocked<Logger> = { log: jest.fn(), warn: jest.fn() }
 const mockProductRepository: jest.Mocked<ProductRepository> = { getProductById: jest.fn() }
 
 const buildCartFactory = (): CartFactory => new CartFactory(
   mockProductRepository,
-  mockDiscountCalculator,
-  mockShippingCalculator,
+  mockCartSummaryService,
   new CartValidator(),
   new Notifier(mockLogger),
   mockLogger
