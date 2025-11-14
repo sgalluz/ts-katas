@@ -1,5 +1,3 @@
-import { IDiscountCalculator } from './DiscountCalculator'
-import { IShippingCalculator } from './ShippingCalculator'
 import { ICartValidator } from './CartValidator'
 import { INotifier } from './Notifier'
 import { ILogger } from './Logger'
@@ -8,12 +6,12 @@ import { UserProfile } from '../models/UserProfile'
 import { CartManager } from '../CartManager'
 import { CartItem } from '../models/CartItem'
 import { CartItems } from '../models/CartItems'
+import { ICartSummaryService } from './CartSummaryService'
 
 export class CartFactory {
   constructor(
         private readonly productRepository: ProductRepository,
-        private readonly discountCalculator: IDiscountCalculator,
-        private readonly shippingCalculator: IShippingCalculator,
+        private readonly cartSummaryService: ICartSummaryService,
         private readonly cartValidator: ICartValidator,
         private readonly notifier: INotifier,
         private readonly logger: ILogger
@@ -37,8 +35,7 @@ export class CartFactory {
       userProfile,
       new CartItems(initialItems),
       this.productRepository,
-      this.discountCalculator,
-      this.shippingCalculator,
+      this.cartSummaryService,
       this.cartValidator,
       this.notifier,
       this.logger
