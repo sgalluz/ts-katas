@@ -35,11 +35,7 @@ export class CartManager {
   }
 
   public getFinalSummary(checkoutOptions: CheckoutOptions = {}): CartSummary {
-    const summary = this.cartSummaryService.generateSummary(
-      this.cartItems,
-      this.userProfile,
-      checkoutOptions
-    )
+    const summary = this.cartSummaryService.generateSummary(this.cartItems, this.userProfile, checkoutOptions)
 
     if (this.cartValidator.isHighValueOrder(summary.finalTotal, this.cartItems.length)) {
       this.notifier.sendHighValueOrderAlert(this.userProfile.id, summary.finalTotal)

@@ -1,12 +1,12 @@
 import { IShippingService } from './ShippingService'
 import { UserProfile, UserType } from '../models/UserProfile'
+import { CheckoutOptions } from '../models/CheckoutOptions'
 
 export interface ShippingCalculationContext {
     totalPrice: number
     totalWeight: number
-    address: string
     userProfile: UserProfile
-    couponCode: string | null
+    checkoutOptions: CheckoutOptions
 }
 
 export interface IShippingCalculator {
@@ -24,9 +24,10 @@ export class ShippingCalculator {
   }
 
   public calculateShipping(context: ShippingCalculationContext): number {
-    const { totalPrice, totalWeight, address, userProfile, couponCode } = context
+    const { totalPrice, totalWeight, userProfile, checkoutOptions } = context
+    const { shippingAddress = '', couponCode = null } = checkoutOptions
 
-    const shippingCost = this.getBaseShippingCost(totalPrice, address, totalWeight, couponCode)
+    const shippingCost = this.getBaseShippingCost(totalPrice, shippingAddress, totalWeight, couponCode)
 
     const shouldApplyExtraFee = userProfile.type === UserType.Guest
             && totalPrice + shippingCost > ShippingCalculator.SHIPPING_FEE_THRESHOLD

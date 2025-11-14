@@ -6,18 +6,19 @@ import { CartItems } from '../models/CartItems'
 import { CheckoutOptions } from '../models/CheckoutOptions'
 
 export interface ICartSummaryService {
-  generateSummary(
-    cartItems: CartItems,
-    userProfile: UserProfile,
-    checkoutOptions: CheckoutOptions
-  ): CartSummary
+    generateSummary(
+        cartItems: CartItems,
+        userProfile: UserProfile,
+        checkoutOptions: CheckoutOptions
+    ): CartSummary
 }
 
 export class CartSummaryService implements ICartSummaryService {
   constructor(
-    private readonly discountCalculator: IDiscountCalculator,
-    private readonly shippingCalculator: IShippingCalculator
-  ) {}
+        private readonly discountCalculator: IDiscountCalculator,
+        private readonly shippingCalculator: IShippingCalculator
+  ) {
+  }
 
   public generateSummary(
     cartItems: CartItems,
@@ -33,9 +34,8 @@ export class CartSummaryService implements ICartSummaryService {
     const shippingCost = this.shippingCalculator.calculateShipping({
       totalPrice: totalAfterDiscount,
       totalWeight: cartItems.totalWeight,
-      address: shippingAddress,
       userProfile: userProfile,
-      couponCode
+      checkoutOptions: { shippingAddress, couponCode }
     })
 
     const finalTotal = totalAfterDiscount + shippingCost
