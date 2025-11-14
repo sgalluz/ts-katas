@@ -54,6 +54,63 @@ Participants will learn to:
 
 ------------------------------------------------
 
+## 🚨 The Business Problem
+
+### Context: "The Black Friday Campaign is Blocked"
+
+Imagine receiving this urgent message from your Product Manager or E-commerce Lead:
+
+> **To:** Development Team
+> **From:** Product Manager
+> **Subject:** URGENT! Black Friday campaign blocked - losing money NOW
+>
+> Team, we have two critical problems, both caused by the cart management system (`CartManager`):
+>
+> **1. We're Losing Money RIGHT NOW:**
+>
+> Finance discovered that our discount system is broken. The bug in the code causes the **"First Purchase" discount (10%) to STACK with coupon codes**. A "Standard" user making their first purchase who uses the "TS_DOJO_20" coupon (20%) is getting 30% off instead of just 20%! This is costing us thousands of euros daily.
+>
+> **2. We're Blocked on Future Revenue (Black Friday):**
+>
+> Marketing wants to launch our most important campaign ever in two weeks. The new rules are:
+> - **BF Rule 1:** For **Premium** users, a "Buy 3, Pay for 2" promotion on selected products.
+> - **BF Rule 2:** For all other users, **Free Shipping** on all orders.
+>
+> **THE BLOCKER:**
+>
+> We tried adding the "Free Shipping" logic and the system went haywire: it started giving free shipping *AND* applying the "FREE_SHIPPING" coupon (double discounts!).
+>
+> It's clear that `CartManager` is a black box. We cannot risk modifying it without proper safeguards.
+
+### Why the Current Implementation Blocks the Business
+
+The `CartManager` class suffers from several architectural issues that prevent implementing new business requirements:
+
+1. **Tangled Logic:** Discount calculation, shipping fees, and coupon application are all mixed together in a single method, making it impossible to modify one without affecting the others.
+
+2. **Hidden Dependencies:** The class directly accesses external services (database, logging) and applies business rules in an unpredictable order, making behavior hard to test and verify.
+
+3. **No Safety Net:** Zero test coverage means any change could break existing functionality in unexpected ways, as demonstrated by the current bug that's causing financial losses.
+
+4. **Rigid Structure:** The God Class pattern makes it impossible to add new discount strategies or shipping rules without risking cascading failures.
+
+### The Dojo Mission
+
+Our goal today is not just to "clean up code" - it's to **unblock the Black Friday campaign** and **stop losing money**.
+
+To achieve this, we need to:
+
+1. **Fix the discount stacking bug** immediately (stop the financial bleeding)
+2. **Create a test safety net** around the existing behavior
+3. **Extract discount and shipping logic** into separate, testable components
+4. **Enable the implementation** of Black Friday rules without fear of breaking existing functionality
+
+**Success Criteria:** The code is ready to safely implement BF Rule 1 (Buy 3, Pay for 2) and BF Rule 2 (Free Shipping) without breaking existing customer experiences or creating new financial losses.
+
+The refactoring and testing work are not the end goal - they are the *necessary means* to deliver business value and unlock revenue opportunities.
+
+------------------------------------------------
+
 ## 🏗️ Implementation: Testing and Refactoring (1 hour and 45 minutes)
 
 ### Phase 1: Test Coverage (45 minutes)
