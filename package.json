@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf ./dist",
+    "clean": "rm -rf ./dist ./coverage",
     "dev": "ts-node ./src/index.ts",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
