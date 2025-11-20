@@ -34,6 +34,7 @@ export class CartManager {
      * Simulates data retrieval and validation.
      */
   private loadInitialCart(savedItems: { productId: number, quantity: number }[]) {
+
     savedItems.forEach(item => {
       // Simulates product retrieval from DB (another hidden dependency!)
       const product: Product = {
@@ -52,6 +53,22 @@ export class CartManager {
   private logCartInitialization(userId: number): void {
     // Simulates writing to an external log file
     console.log(`[LOGGING] Cart initialized for user: ${userId}.`)
+  }
+
+  public getItems(): { product: Product, quantity: number }[] {
+    return this.items
+  }
+
+  public getShippingAddress(): string {
+    return this.shippingAddress
+  }
+
+  public getAppliedCouponCode(): string | null {
+    return this.appliedCouponCode
+  }
+
+  public getUserProfile(): UserProfile {
+    return this.userProfile
   }
 
   /**
@@ -153,6 +170,8 @@ export class CartManager {
       finalTotal: finalTotal
     }
   }
+
+
 
   /**
      * Another private side effect.
