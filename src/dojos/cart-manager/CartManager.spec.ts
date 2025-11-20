@@ -1,5 +1,8 @@
+import exp from 'constants'
 import { CartManager } from './CartManager'
 import { UserProfile, UserType } from './models/UserProfile'
+import { totalmem } from 'os'
+import { disconnect } from 'process'
 
 describe('Cart Manager', () => {
   const userProfile: UserProfile = {
@@ -79,4 +82,32 @@ describe('Cart Manager', () => {
 
     expect(summary).toStrictEqual({ total: 20, discount: 6, shippingCost: 10, finalTotal: 24 })
   })
+
+    it('should remove item if item exists', () => {
+    cartManager.updateCart(2, 1, 'TS_DOJO_20', 'VP19')
+    cartManager.updateCart(3, 4, null, 'VP19')
+
+    const updateResult = cartManager.updateCart(2, -2, null, 'VP19')
+
+    expect(updateResult.success).toBeTruthy();
+    expect(updateResult.message).toBe('Item removed or zero quantity ignored.')
+    })
+
+    it('should return empty cart with shipping cost when removing an existing item ', () => {
+    cartManager.updateCart(3, 1, 'TS_DOJO_20', 'VP19')
+    cartManager.updateCart(3, 0, "TS_DOJO_20", "VP19");
+
+    const result = cartManager.getFinalSummary();
+
+    expect(result).toStrictEqual({total: 0, discount: 0, shippingCost: 10, finalTotal: 10})
+    })
+
+
+    it('should return shipping cost of 10 when no shipping address is given', () => {
+        cartManager.updateCart(2, 1, "", undefined);
+
+        const result = cartManager.getFinalSummary();
+        expect(result).toStrictEqual({total: 20, discount: 2, shippingCost: 15, finalTotal: 33})
+    })
+
 })
