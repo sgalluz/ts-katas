@@ -210,7 +210,7 @@ describe("CartManager getFinalSummary", () => {
       validateCouponSpy.mockRestore();
     });
 
-    it("should add first purchase discount to coupon discount when validateCoupon returns a value", () => {
+    it("should apply the coupon discount when user applies a coupon code", () => {
       // Arrange
       const mockUserProfile: UserProfile = {
         id: 200,
@@ -231,9 +231,12 @@ describe("CartManager getFinalSummary", () => {
       // Act
       const result = cartManager.getFinalSummary();
 
-      // Assert: Discount should be mocked value + 10% of subtotal
-      // subtotal = 1 * 10 * 2 = 20, so 10% = 2, total discount = 50 + 2 = 52
-      expect(result.discount).toBe(52);
+      // Assert: Should apply the coupon discount, not first purchase discount
+      // subtotal = 1 * 10 * 2 = 20
+      // First purchase discount would be 10% = 2
+      // Coupon discount = 50
+      // Expected: 50 (the applied coupon discount)
+      expect(result.discount).toBe(50);
 
       // Cleanup
       validateCouponSpy.mockRestore();
