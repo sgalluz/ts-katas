@@ -99,83 +99,169 @@ describe("CartManager Constructor", () => {
 });
 
 describe("CartManager getFinalSummary", () => {
-  it("should return zero discount when validateCoupon returns null", () => {
-    // Arrange
-    const mockUserProfile: UserProfile = {
-      id: 100,
-      type: UserType.Standard,
-      isFirstPurchase: false,
-      savedCartItems: [],
-    };
+  describe("when user is NOT first purchase", () => {
+    it("should return zero discount when validateCoupon returns null", () => {
+      // Arrange
+      const mockUserProfile: UserProfile = {
+        id: 100,
+        type: UserType.Standard,
+        isFirstPurchase: false,
+        savedCartItems: [],
+      };
 
-    const cartManager = new CartManager(mockUserProfile);
-    const validateCouponSpy = jest
-      .spyOn(DiscountService, "validateCoupon")
-      .mockReturnValue(null);
+      const cartManager = new CartManager(mockUserProfile);
+      const validateCouponSpy = jest
+        .spyOn(DiscountService, "validateCoupon")
+        .mockReturnValue(null);
 
-    // Apply a coupon code
-    cartManager.updateCart(1, 2, "TS_DOJO_20");
+      // Apply a coupon code
+      cartManager.updateCart(1, 2, "TS_DOJO_20");
 
-    // Act
-    const result = cartManager.getFinalSummary();
+      // Act
+      const result = cartManager.getFinalSummary();
 
-    // Assert: Discount should be zero
-    expect(result.discount).toBe(0);
+      // Assert: Discount should be zero
+      expect(result.discount).toBe(0);
 
-    // Cleanup
-    validateCouponSpy.mockRestore();
+      // Cleanup
+      validateCouponSpy.mockRestore();
+    });
+
+    it("should return the mocked discount value when validateCoupon returns a value", () => {
+      // Arrange
+      const mockUserProfile: UserProfile = {
+        id: 100,
+        type: UserType.Standard,
+        isFirstPurchase: false,
+        savedCartItems: [],
+      };
+
+      const cartManager = new CartManager(mockUserProfile);
+      const mockDiscountValue = 50;
+      const validateCouponSpy = jest
+        .spyOn(DiscountService, "validateCoupon")
+        .mockReturnValue(mockDiscountValue);
+
+      // Apply a coupon code
+      cartManager.updateCart(1, 2, "TS_DOJO_20");
+
+      // Act
+      const result = cartManager.getFinalSummary();
+
+      // Assert: Discount should be the mocked value
+      expect(result.discount).toBe(mockDiscountValue);
+
+      // Cleanup
+      validateCouponSpy.mockRestore();
+    });
+
+    it("should not call DiscountService.validateCoupon when appliedCouponCode is null", () => {
+      // Arrange
+      const mockUserProfile: UserProfile = {
+        id: 101,
+        type: UserType.Standard,
+        isFirstPurchase: false,
+        savedCartItems: [],
+      };
+
+      const cartManager = new CartManager(mockUserProfile);
+      const validateCouponSpy = jest.spyOn(DiscountService, "validateCoupon");
+
+      // Add item without coupon code
+      cartManager.updateCart(1, 2);
+
+      // Act
+      cartManager.getFinalSummary();
+
+      // Assert: DiscountService.validateCoupon should NOT be called
+      expect(validateCouponSpy).not.toHaveBeenCalled();
+
+      // Cleanup
+      validateCouponSpy.mockRestore();
+    });
   });
 
-  it("should return the mocked discount value when validateCoupon returns a value", () => {
-    // Arrange
-    const mockUserProfile: UserProfile = {
-      id: 100,
-      type: UserType.Standard,
-      isFirstPurchase: false,
-      savedCartItems: [],
-    };
+  describe("when user is first purchase", () => {
+    it("should return first purchase discount when validateCoupon returns null", () => {
+      // Arrange
+      const mockUserProfile: UserProfile = {
+        id: 200,
+        type: UserType.Standard,
+        isFirstPurchase: true,
+        savedCartItems: [],
+      };
 
-    const cartManager = new CartManager(mockUserProfile);
-    const mockDiscountValue = 50;
-    const validateCouponSpy = jest
-      .spyOn(DiscountService, "validateCoupon")
-      .mockReturnValue(mockDiscountValue);
+      const cartManager = new CartManager(mockUserProfile);
+      const validateCouponSpy = jest
+        .spyOn(DiscountService, "validateCoupon")
+        .mockReturnValue(null);
 
-    // Apply a coupon code
-    cartManager.updateCart(1, 2, "TS_DOJO_20");
+      // Apply a coupon code (but it returns null)
+      cartManager.updateCart(1, 2, "INVALID_CODE");
 
-    // Act
-    const result = cartManager.getFinalSummary();
+      // Act
+      const result = cartManager.getFinalSummary();
 
-    // Assert: Discount should be the mocked value
-    expect(result.discount).toBe(mockDiscountValue);
+      // Assert: Discount should be 10% of subtotal (first purchase bonus)
+      // subtotal = 1 * 10 * 2 = 20, so 10% = 2
+      expect(result.discount).toBe(2);
 
-    // Cleanup
-    validateCouponSpy.mockRestore();
-  });
+      // Cleanup
+      validateCouponSpy.mockRestore();
+    });
 
-  it("should not call DiscountService.validateCoupon when appliedCouponCode is null", () => {
-    // Arrange
-    const mockUserProfile: UserProfile = {
-      id: 101,
-      type: UserType.Standard,
-      isFirstPurchase: false,
-      savedCartItems: [],
-    };
+    it("should add first purchase discount to coupon discount when validateCoupon returns a value", () => {
+      // Arrange
+      const mockUserProfile: UserProfile = {
+        id: 200,
+        type: UserType.Standard,
+        isFirstPurchase: true,
+        savedCartItems: [],
+      };
 
-    const cartManager = new CartManager(mockUserProfile);
-    const validateCouponSpy = jest.spyOn(DiscountService, "validateCoupon");
+      const cartManager = new CartManager(mockUserProfile);
+      const mockDiscountValue = 50;
+      const validateCouponSpy = jest
+        .spyOn(DiscountService, "validateCoupon")
+        .mockReturnValue(mockDiscountValue);
 
-    // Add item without coupon code
-    cartManager.updateCart(1, 2);
+      // Apply a coupon code
+      cartManager.updateCart(1, 2, "TS_DOJO_20");
 
-    // Act
-    cartManager.getFinalSummary();
+      // Act
+      const result = cartManager.getFinalSummary();
 
-    // Assert: DiscountService.validateCoupon should NOT be called
-    expect(validateCouponSpy).not.toHaveBeenCalled();
+      // Assert: Discount should be mocked value + 10% of subtotal
+      // subtotal = 1 * 10 * 2 = 20, so 10% = 2, total discount = 50 + 2 = 52
+      expect(result.discount).toBe(52);
 
-    // Cleanup
-    validateCouponSpy.mockRestore();
+      // Cleanup
+      validateCouponSpy.mockRestore();
+    });
+
+    it("should not call DiscountService.validateCoupon when appliedCouponCode is null", () => {
+      // Arrange
+      const mockUserProfile: UserProfile = {
+        id: 201,
+        type: UserType.Standard,
+        isFirstPurchase: true,
+        savedCartItems: [],
+      };
+
+      const cartManager = new CartManager(mockUserProfile);
+      const validateCouponSpy = jest.spyOn(DiscountService, "validateCoupon");
+
+      // Add item without coupon code
+      cartManager.updateCart(1, 2);
+
+      // Act
+      cartManager.getFinalSummary();
+
+      // Assert: DiscountService.validateCoupon should NOT be called
+      expect(validateCouponSpy).not.toHaveBeenCalled();
+
+      // Cleanup
+      validateCouponSpy.mockRestore();
+    });
   });
 });
