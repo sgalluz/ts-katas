@@ -1,16 +1,26 @@
 import { CartManager } from './CartManager'
 import { UserProfile, UserType } from './models/UserProfile'
+import * as ProductModule from './models/Product'
 
 describe('CartManager Constructor', () => {
   let consoleSpy: jest.SpyInstance
+  let buildProductSpy: jest.SpyInstance
 
   beforeEach(() => {
     consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {
+      // Mock implementation
     })
+    buildProductSpy = jest.spyOn(ProductModule, 'buildProduct').mockImplementation((id) => ({
+      id,
+      name: `Product ${id}`,
+      price: id * 10,
+      weightKg: 1
+    }))
   })
 
   afterEach(() => {
     consoleSpy.mockRestore()
+    buildProductSpy.mockRestore()
   })
 
   it('should create CartManager instance with minimal user profile ', () => {
@@ -56,11 +66,19 @@ describe('CartManager Constructor', () => {
 
 describe('CartManager updateCart update items', () => {
   let consoleSpy: jest.SpyInstance
+  let buildProductSpy: jest.SpyInstance
   let cartManager: CartManager
 
   beforeEach(() => {
     consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {
+      // Mock implementation
     })
+    buildProductSpy = jest.spyOn(ProductModule, 'buildProduct').mockImplementation((id) => ({
+      id,
+      name: `Product ${id}`,
+      price: id * 10,
+      weightKg: 1
+    }))
     const userProfile: UserProfile = {
       id: 1,
       type: UserType.Standard,
@@ -72,6 +90,7 @@ describe('CartManager updateCart update items', () => {
 
   afterEach(() => {
     consoleSpy.mockRestore()
+    buildProductSpy.mockRestore()
   })
 
   describe('Basic item updates', () => {
@@ -158,7 +177,7 @@ describe('CartManager updateCart update items', () => {
 
     it('should remove item when quantity is negative', () => {
       cartManager.updateCart(100, 2)
-      const result = cartManager.updateCart(10, -1)
+      const result = cartManager.updateCart(100, -1)
 
       expect(result).toEqual({ success: true, message: 'Item removed or zero quantity ignored.' })
       expect(cartManager.getItems()).toHaveLength(0)
@@ -186,6 +205,21 @@ describe('CartManager updateCart update items', () => {
     expect(cartManager.getShippingAddress()).toBe('123 Main St')
   })
 
+  it('should call buildProduct with correct productId', () => {
+    cartManager.updateCart(42, 1)
 
+    expect(buildProductSpy).toHaveBeenCalledWith(42)
+    expect(buildProductSpy).toHaveBeenCalledTimes(1)
+  })
 
+  it('should call buildProduct for each update', () => {
+    cartManager.updateCart(10, 1)
+    cartManager.updateCart(20, 2)
+    cartManager.updateCart(10, 3)
+
+    expect(buildProductSpy).toHaveBeenCalledTimes(3)
+    expect(buildProductSpy).toHaveBeenNthCalledWith(1, 10)
+    expect(buildProductSpy).toHaveBeenNthCalledWith(2, 20)
+    expect(buildProductSpy).toHaveBeenNthCalledWith(3, 10)
+  })
 })

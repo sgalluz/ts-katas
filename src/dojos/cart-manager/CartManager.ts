@@ -1,6 +1,6 @@
 import { ShippingService } from './services/ShippingService'
 import { DiscountService } from './services/DiscountService'
-import { Product } from './models/Product'
+import { buildProduct, Product } from './models/Product'
 import { UserProfile, UserType } from './models/UserProfile'
 
 
@@ -37,12 +37,7 @@ export class CartManager {
 
     savedItems.forEach(item => {
       // Simulates product retrieval from DB (another hidden dependency!)
-      const product: Product = {
-        id: item.productId,
-        name: `Product ${item.productId}`,
-        price: item.productId * 10,
-        weightKg: 1
-      }
+      const product: Product = buildProduct(item.productId)
       this.items.push({ product, quantity: item.quantity })
     })
   }
@@ -71,9 +66,6 @@ export class CartManager {
     return this.userProfile
   }
 
-  /**
-     * Huge method that does too many things (CRUD + Business Logic)
-     */
   public updateCart(
     productId: number,
     quantity: number,
@@ -81,34 +73,72 @@ export class CartManager {
     address = ''
   ): { success: boolean, message: string } {
 
-    // 1. Cart Management (Responsibility 1)
-    // Simulates product retrieval
-    const product: Product = { id: productId, name: `Product ${productId}`, price: productId * 10, weightKg: 1 }
-    const existingItem = this.items.find(item => item.product.id === productId)
+    const product: Product = buildProduct(productId)
 
-    if (quantity <= 0) {
-      if (existingItem) {
-        this.items = this.items.filter(item => item.product.id !== productId)
-      }
-      return { success: true, message: 'Item removed or zero quantity ignored.' }
+    const validationResult = this.validateCartUpdate(product)
+    if (!validationResult.isValid) {
+      return { success: false, message: validationResult.message }
     }
 
+    this.updateCartItems(productId, product, quantity)
+    this.updateCartCoupon(couponCode)
+    this.updateCartAddress(address)
+
+    return { success: true, message: 'Cart updated successfully.' }
+  }
+
+  private validateCartUpdate(product: Product): { isValid: boolean, message: string } {
+    if (this.userProfile.id === 999 && product.price > 100) {
+      return {
+        isValid: false,
+        message: 'VIP user 999 cannot purchase expensive items directly.'
+      }
+    }
+    return { isValid: true, message: '' }
+  }
+
+  private updateCartItems(productId: number, product: Product, quantity: number): void {
+    if (quantity <= 0) {
+      this.removeCartItem(productId)
+      return
+    }
+
+    const existingItem = this.items.find(item => item.product.id === productId)
     if (existingItem) {
       existingItem.quantity = quantity
     } else {
       this.items.push({ product, quantity })
     }
+  }
 
-    // 2. Lifestyle Updates (Implicit side effects)
+  private removeCartItem(productId: number): void {
+    this.items = this.items.filter(item => item.product.id !== productId)
+  }
+
+  private updateCartCoupon(couponCode: string | null): void {
     this.appliedCouponCode = couponCode
-    this.shippingAddress = address
+  }
 
-    // 3. Logic Control (Responsibility 2: Validation)
-    if (this.userProfile.id === 999 && product.price > 100) { // Uses this.userProfile.id
-      return { success: false, message: 'VIP user 999 cannot purchase expensive items directly.' }
+  private updateCartAddress(address: string): void {
+    this.shippingAddress = address
+  }
+
+
+  public updateCartItem(
+    productId: number,
+    quantity: number,
+  ): { success: boolean, message: string } {
+
+    const existingItem = this.items.find(item => item.product.id === productId)
+
+    if (existingItem) {
+      existingItem.quantity = quantity
+    } else {
+      const product: Product = buildProduct(productId)
+      this.items.push({ product, quantity })
     }
 
-    return { success: true, message: 'Cart updated successfully.' }
+    return { success: true, message: 'Cart item updated successfully.' }
   }
 
   /**
@@ -170,8 +200,6 @@ export class CartManager {
       finalTotal: finalTotal
     }
   }
-
-
 
   /**
      * Another private side effect.

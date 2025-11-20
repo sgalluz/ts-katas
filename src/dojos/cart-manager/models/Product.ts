@@ -7,3 +7,7 @@ export interface Product {
     price: number;
     weightKg: number;
 }
+
+export function buildProduct(id: number): Product {
+  return { id: id, name: `Product ${id}`, price: id * 10, weightKg: 1 }
+}
