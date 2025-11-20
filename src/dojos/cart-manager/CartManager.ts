@@ -3,7 +3,6 @@ import { DiscountService } from './services/DiscountService'
 import { Product } from './models/Product'
 import { UserProfile, UserType } from './models/UserProfile'
 
-
 // The God Class
 export class CartManager {
   private items: { product: Product, quantity: number }[] = []
@@ -67,8 +66,7 @@ export class CartManager {
     // 1. Cart Management (Responsibility 1)
     // Simulates product retrieval
     const product: Product = { id: productId, name: `Product ${productId}`, price: productId * 10, weightKg: 1 }
-    const existingItem = this.items.find(item => item.product.id === productId)
-
+    const existingItem = this.checkExistingItem(productId)
     if (quantity <= 0) {
       if (existingItem) {
         this.items = this.items.filter(item => item.product.id !== productId)
@@ -77,7 +75,7 @@ export class CartManager {
     }
 
     if (existingItem) {
-      existingItem.quantity = quantity
+      this.updateQuantity(existingItem, quantity)
     } else {
       this.items.push({ product, quantity })
     }
@@ -160,5 +158,12 @@ export class CartManager {
   private sendHighValueOrderAlert(amount: number): void {
     console.log(`*** NOTIFICATION ***: User ${this.userProfile.id} has a high-value cart: ${amount}`)
     // Send an email to the administrator...
+  }
+
+  private checkExistingItem(productId: number){
+      return this.items.find(item => item.product.id === productId)
+  }
+  private updateQuantity(existingItem:any,quantity:number){
+      existingItem.quantity = quantity
   }
 }
