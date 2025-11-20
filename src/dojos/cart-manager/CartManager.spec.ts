@@ -3,6 +3,7 @@
 /* eslint-disable @stylistic/js/quotes */
 import { CartManager } from "./CartManager";
 import { UserProfile, UserType } from "./models/UserProfile";
+import { DiscountService } from "./services/DiscountService";
 
 describe("CartManager Constructor", () => {
   it("should call logCartInitialization with the user profile id when user has no saved cart items", () => {
@@ -94,5 +95,87 @@ describe("CartManager Constructor", () => {
     // Cleanup
     consoleLogSpy.mockRestore();
     loadInitialCartSpy.mockRestore();
+  });
+});
+
+describe("CartManager getFinalSummary", () => {
+  it("should return zero discount when validateCoupon returns null", () => {
+    // Arrange
+    const mockUserProfile: UserProfile = {
+      id: 100,
+      type: UserType.Standard,
+      isFirstPurchase: false,
+      savedCartItems: [],
+    };
+
+    const cartManager = new CartManager(mockUserProfile);
+    const validateCouponSpy = jest
+      .spyOn(DiscountService, "validateCoupon")
+      .mockReturnValue(null);
+
+    // Apply a coupon code
+    cartManager.updateCart(1, 2, "TS_DOJO_20");
+
+    // Act
+    const result = cartManager.getFinalSummary();
+
+    // Assert: Discount should be zero
+    expect(result.discount).toBe(0);
+
+    // Cleanup
+    validateCouponSpy.mockRestore();
+  });
+
+  it("should return the mocked discount value when validateCoupon returns a value", () => {
+    // Arrange
+    const mockUserProfile: UserProfile = {
+      id: 100,
+      type: UserType.Standard,
+      isFirstPurchase: false,
+      savedCartItems: [],
+    };
+
+    const cartManager = new CartManager(mockUserProfile);
+    const mockDiscountValue = 50;
+    const validateCouponSpy = jest
+      .spyOn(DiscountService, "validateCoupon")
+      .mockReturnValue(mockDiscountValue);
+
+    // Apply a coupon code
+    cartManager.updateCart(1, 2, "TS_DOJO_20");
+
+    // Act
+    const result = cartManager.getFinalSummary();
+
+    // Assert: Discount should be the mocked value
+    expect(result.discount).toBe(mockDiscountValue);
+
+    // Cleanup
+    validateCouponSpy.mockRestore();
+  });
+
+  it("should not call DiscountService.validateCoupon when appliedCouponCode is null", () => {
+    // Arrange
+    const mockUserProfile: UserProfile = {
+      id: 101,
+      type: UserType.Standard,
+      isFirstPurchase: false,
+      savedCartItems: [],
+    };
+
+    const cartManager = new CartManager(mockUserProfile);
+    const validateCouponSpy = jest.spyOn(DiscountService, "validateCoupon");
+
+    // Add item without coupon code
+    cartManager.updateCart(1, 2);
+
+    // Act
+    cartManager.getFinalSummary();
+
+    // Assert: DiscountService.validateCoupon should NOT be called
+    expect(validateCouponSpy).not.toHaveBeenCalled();
+
+    // Cleanup
+    validateCouponSpy.mockRestore();
   });
 });
