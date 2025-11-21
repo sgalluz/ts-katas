@@ -10,13 +10,18 @@ import { Notifier } from './services/Notifier'
 import { Product } from './models/Product'
 import { aUser } from './utils/UserProfileBuilder'
 import { ProductRepository } from './repositories/ProductRepository'
-import { CartItems } from './models/CartItems'
+import { Cart } from './models/Cart'
 import { CartSummaryService } from './services/CartSummaryService'
 
 const mockDiscountService: jest.Mocked<IDiscountService> = { validateCoupon: jest.fn() }
 const mockShippingService: jest.Mocked<IShippingService> = { calculate: jest.fn() }
 const mockLogger: jest.Mocked<Logger> = { log: jest.fn(), warn: jest.fn() }
 const mockProductRepository: jest.Mocked<ProductRepository> = { getProductById: jest.fn() }
+
+const buildCartFor = (user: UserProfile): Cart =>
+  new Cart(user.savedCartItems.map(({ productId, quantity }) => ({
+    product: buildProduct(productId), quantity
+  })))
 
 const buildCartManager = (user: UserProfile) => {
   const discountCalculator = new DiscountCalculator(mockDiscountService)
@@ -25,13 +30,9 @@ const buildCartManager = (user: UserProfile) => {
   const cartValidator = new CartValidator()
   const notifier = new Notifier(mockLogger)
 
-  const items = user.savedCartItems.map(({ productId, quantity }) => ({
-    product: buildProduct(productId), quantity
-  }))
-
   return new CartManager(
     user,
-    new CartItems(items),
+    buildCartFor(user),
     mockProductRepository,
     cartSummaryService,
     cartValidator,

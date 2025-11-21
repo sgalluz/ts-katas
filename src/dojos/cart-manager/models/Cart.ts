@@ -1,7 +1,11 @@
-import { CartItem } from './CartItem'
 import { Product } from './Product'
 
-export class CartItems {
+interface CartItem {
+    product: Product,
+    quantity: number
+}
+
+export class Cart {
   constructor(private items: CartItem[] = []) {
   }
 

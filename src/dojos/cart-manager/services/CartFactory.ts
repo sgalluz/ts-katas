@@ -4,8 +4,7 @@ import { ILogger } from './Logger'
 import { ProductRepository } from '../repositories/ProductRepository'
 import { UserProfile } from '../models/UserProfile'
 import { CartManager } from '../CartManager'
-import { CartItem } from '../models/CartItem'
-import { CartItems } from '../models/CartItems'
+import { Cart } from '../models/Cart'
 import { ICartSummaryService } from './CartSummaryService'
 
 export class CartFactory {
@@ -22,23 +21,29 @@ export class CartFactory {
     const { savedCartItems, id } = userProfile
     if (savedCartItems.length) this.logger.log(`Loading ${savedCartItems.length} saved items for user ${id}`)
 
-    const initialItems: CartItem[] =
-            savedCartItems.flatMap(({ productId, quantity }) => {
-              const product = this.productRepository.getProductById(productId)
-              if (product) return [{ product, quantity }]
-
-              this.logger.warn(`Saved product ${productId} not found. Ignoring...`)
-              return []
-            })
+    const cart = this.buildCartFromSavedItems(savedCartItems)
 
     return new CartManager(
       userProfile,
-      new CartItems(initialItems),
+      cart,
       this.productRepository,
       this.cartSummaryService,
       this.cartValidator,
       this.notifier,
       this.logger
     )
+  }
+
+  private buildCartFromSavedItems(savedItems: UserProfile['savedCartItems']): Cart {
+    const items: Cart['items'] = savedItems.flatMap(item => this.toCartItem(item))
+    return new Cart(items)
+  }
+
+  private toCartItem({ productId, quantity }: UserProfile['savedCartItems'][number]): Cart['items'] {
+    const product = this.productRepository.getProductById(productId)
+    if (product) return [{ product, quantity }]
+
+    this.logger.warn(`Saved product ${productId} not found. Ignoring...`)
+    return []
   }
 }
